@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Logify</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="welcome">Welcome To LOGIFY</string>
+    <string name="title_1">Title One</string>
+    <string name="description_1">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Et illum, iste iure laboriosam nulla perspiciatis praesentium quis quisquam sunt vero.</string>
+    <string name="title_2">Title Two</string>
+    <string name="description_2">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Et illum, iste iure laboriosam nulla perspiciatis praesentium quis quisquam sunt vero.</string>
+    <string name="title_3">Title Three</string>
+    <string name="description_3">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Et illum, iste iure laboriosam nulla perspiciatis praesentium quis quisquam sunt vero.</string>
+    <!--    auth login and register-->
+    <string name="login_title">Login to Your Account</string>
+    <string name="phone_number">Phone number</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+    <string name="register_title">Register to Your Account</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="remember_me">Remember me</string>
+    <string name="or">OR</string>
+    <string name="login_with_gg">Login With Google</string>
+    <string name="policy">By signing up, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="cancel">Cancel</string>
+</resources>

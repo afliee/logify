@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="TextLabel" parent="TextAppearance.Design.Hint">
+        <item name="android:textSize">14sp</item>
+        <item name="boxBackgroundMode">none</item>
+        <item name="android:textColor">@color/fifty_percent_black_overlay</item>
+        <item name="android:fontFamily">@font/montserrat_light</item>
+        <item name="boxStrokeWidth">0dp</item>
+    </style>
+
+</resources>

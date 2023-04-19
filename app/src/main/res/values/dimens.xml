@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <dimen name="activity_horizontal_margin">0dp</dimen>
+    <dimen name="activity_vertical_margin">0dp</dimen>
+    <dimen name="text14sp">14sp</dimen>
+    <dimen name="oneDP">1dp</dimen>
+    <dimen name="button_control_center_size">45dp</dimen>
+    <dimen name="header1_text_size">20sp</dimen>
+    <dimen name="title_text_margin_left">5dp</dimen>
+    <dimen name="nav_header_vertical_spacing">8dp</dimen>
+    <dimen name="nav_header_height">176dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="padding_button_option_center">15dp</dimen>
+    <dimen name="action_bar_size">?android:attr/actionBarSize</dimen>
+
+    <dimen name="_8dp">8dp</dimen>
+    <dimen name="_16dp">16dp</dimen>
+    <dimen name="_24dp">24dp</dimen>
+    <dimen name="_32dp">32dp</dimen>
+    <dimen name="_40dp">40dp</dimen>
+    <dimen name="_48dp">48dp</dimen>
+    <dimen name="_56dp">56dp</dimen>
+    <dimen name="_64dp">64dp</dimen>
+    <dimen name="_72dp">72dp</dimen>
+    <dimen name="_80dp">80dp</dimen>
+    <dimen name="_160dp">160dp</dimen>
+
+    <dimen name="_8sp">8sp</dimen>
+    <dimen name="_16sp">16sp</dimen>
+    <dimen name="_24sp">24sp</dimen>
+    <dimen name="_32sp">32sp</dimen>
+    <dimen name="_40sp">40sp</dimen>
+    <dimen name="_48sp">48sp</dimen>
+    <dimen name="_56sp">56sp</dimen>
+    <dimen name="_64sp">64sp</dimen>
+    <dimen name="_72sp">72sp</dimen>
+    <dimen name="_80sp">80sp</dimen>
+    <dimen name="_160sp">160sp</dimen>
+    <dimen name="_2dp">2dp</dimen>
+    <dimen name="_4dp">4dp</dimen>
+    <dimen name="_10dp">10dp</dimen>
+    <dimen name="_14sp">14sp</dimen>
+    <dimen name="_0dp">0dp</dimen>
+    <dimen name="_1dp">1dp</dimen>
+    <dimen name="_12sp">12dp</dimen>
+    <dimen name="_14dp">14dp</dimen>
+</resources>
