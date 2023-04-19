@@ -12,9 +12,13 @@
         android:theme="@style/Theme.Logify"
         tools:targetApi="31">
         <activity
-            android:name=".auth.OTPVerifyActivity"
+            android:name=".auth.ForgotPasswordActivity"
             android:exported="false"
             android:theme="@style/Theme.AuthScreen"/>
+        <activity
+            android:name=".auth.OTPVerifyActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AuthScreen" />
         <activity
             android:name=".auth.SignInActivity"
             android:exported="false"

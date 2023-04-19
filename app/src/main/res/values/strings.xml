@@ -26,4 +26,24 @@
     <string name="login_with_gg">Login With Google</string>
     <string name="policy">By signing up, you agree to our Terms of Service and Privacy Policy</string>
     <string name="cancel">Cancel</string>
+    <string name="user_name">User Name</string>
+<!--    otp -->
+    <string name="opt_message">We have sent you a verification code to %s. Please enter the code below to verify your phone number.</string>
+    <string name="resend_otp">Resend OTP</string>
+    <string name="dont_receive_otp">Didn\'t receive the code?</string>
+    <string name="otp">OTP</string>
+    <string name="verify">Verify</string>
+    <string name="otp_verify_title">Verify Your Phone Number</string>
+    <string name="otp_verify_message">We have sent you a verification code. Please enter the code below to verify your phone number.</string>
+    <string name="phone_number_error">Phone number is not valid</string>
+    <string name="password_error">Password is not valid</string>
+    <string name="confirm_password_error">Confirm password is not valid</string>
+    <string name="phone_number_temporary">+01 123 456 798</string>
+<!--    forgot password-->
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_message">Please fill phone number and we\'ll send you a link to get back into your account.</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="submit">Submit</string>
 </resources>
