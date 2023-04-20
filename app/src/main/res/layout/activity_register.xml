@@ -61,7 +61,7 @@
                 android:layout_gravity="center_vertical"
                 android:background="@android:color/transparent"
                 android:hint="@string/user_name"
-                android:inputType="phone"
+                android:inputType="text"
                 android:textSize="@dimen/_14sp"
                 tools:ignore="TouchTargetSizeCheck" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -95,7 +95,7 @@
             android:layout_marginBottom="@dimen/_16dp"
             android:background="@drawable/button_border_white_flat"
             android:paddingHorizontal="@dimen/_8dp"
-            android:paddingVertical="12dp"
+            android:paddingVertical="@dimen/_12dp"
             app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText

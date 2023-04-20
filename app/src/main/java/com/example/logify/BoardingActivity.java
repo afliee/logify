@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.logify.adapters.ViewPagerAdapter;
+import com.example.logify.auth.SignInActivity;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class BoardingActivity extends AppCompatActivity {
 
@@ -22,7 +24,7 @@ public class BoardingActivity extends AppCompatActivity {
     TextView[] dots;
 
     ViewPagerAdapter viewPagerAdapter;
-
+    FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +58,11 @@ public class BoardingActivity extends AppCompatActivity {
                 if (current < 2) {
                     viewPager.setCurrentItem(getItem(1), true);
                 } else {
+                    if (mAuth.getCurrentUser() == null) {
+                        Intent loginIntent = new Intent(BoardingActivity.this, SignInActivity.class);
+                        startActivity(loginIntent);
+                        finish();
+                    }
                     Intent intent = new Intent(BoardingActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -75,6 +82,8 @@ public class BoardingActivity extends AppCompatActivity {
         btnSkip = findViewById(R.id.btnSkip);
         btnNext = findViewById(R.id.btnNext);
         btnBack = findViewById(R.id.btnBack);
+
+        mAuth = FirebaseAuth.getInstance();
     }
 
     public void setUpDots(int position) {

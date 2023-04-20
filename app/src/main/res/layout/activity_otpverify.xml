@@ -36,6 +36,7 @@
         android:textSize="16sp" />
 
     <TextView
+        android:id="@+id/tvPhoneNumber"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -48,14 +49,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_20dp"
-        android:layout_marginEnd="@dimen/_20dp"
         android:layout_marginTop="@dimen/_32dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="4">
+        android:weightSum="6">
 
         <EditText
+            android:id="@+id/otp1"
             android:layout_width="0dp"
             android:layout_height="@dimen/_50dp"
             android:layout_weight="1"
@@ -67,6 +67,7 @@
             android:gravity="center" />
 
         <EditText
+            android:id="@+id/otp2"
             android:layout_width="0dp"
             android:layout_height="@dimen/_50dp"
             android:layout_weight="1"
@@ -78,6 +79,7 @@
             android:gravity="center" />
 
         <EditText
+            android:id="@+id/otp3"
             android:layout_width="0dp"
             android:layout_height="@dimen/_50dp"
             android:layout_weight="1"
@@ -89,6 +91,29 @@
             android:gravity="center" />
 
         <EditText
+            android:id="@+id/otp4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_50dp"
+            android:layout_weight="1"
+            android:background="@drawable/otp_edit_text"
+            android:maxLines="1"
+            android:maxLength="1"
+            android:layout_marginEnd="@dimen/_10dp"
+            android:inputType="number"
+            android:gravity="center" />
+        <EditText
+            android:id="@+id/otp5"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_50dp"
+            android:layout_weight="1"
+            android:background="@drawable/otp_edit_text"
+            android:maxLines="1"
+            android:maxLength="1"
+            android:layout_marginEnd="@dimen/_10dp"
+            android:inputType="number"
+            android:gravity="center" />
+        <EditText
+            android:id="@+id/otp6"
             android:layout_width="0dp"
             android:layout_height="@dimen/_50dp"
             android:layout_weight="1"
@@ -100,6 +125,7 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/btnVerify"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_24dp"
@@ -126,10 +152,21 @@
             />
 
         <TextView
+            android:id="@+id/tvRecent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/resend_otp"
             android:textColor="@color/active"
+            android:textSize="@dimen/_16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="@dimen/_12dp" />
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/active"
+            android:text="00:30"
             android:textSize="@dimen/_16sp"
             android:textStyle="bold"
             android:layout_marginStart="@dimen/_12dp" />
