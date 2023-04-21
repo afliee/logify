@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 
 import com.example.logify.MainActivity;
 import com.example.logify.R;
+import com.example.logify.entities.User;
+import com.example.logify.models.UserModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -30,6 +33,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.w3c.dom.Text;
 
@@ -42,8 +47,10 @@ public class OTPVerifyActivity extends AppCompatActivity {
     String verificationId = "";
     String phoneNumber = "";
     String username = "";
-
+    String password = "";
+    UserModel userModel;
     FirebaseAuth mAuth;
+    DatabaseReference database;
     PhoneAuthOptions options;
     private boolean isRecent = false;
     private final int recentTimer = 60;
@@ -124,6 +131,8 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
         tvPhoneNumber.setText(COUNTRY_CODE + " " + phoneNumber);
         mAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance().getReference();
+        userModel = new UserModel(database);
 
         otp1.addTextChangedListener(textWatcher);
         otp2.addTextChangedListener(textWatcher);
@@ -146,6 +155,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
         phoneNumber = intent.getStringExtra("phoneNumber");
         verificationId = intent.getStringExtra("verificationId");
         username = intent.getStringExtra("username");
+        password = intent.getStringExtra("password");
     }
 
     private void countTimer() {
@@ -176,10 +186,15 @@ public class OTPVerifyActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
+                            Log.d(TAG, "signInWithCredential: success");
 
                             FirebaseUser user = task.getResult().getUser();
-                            // Update UI
+                            // Create a new user with a first and last name
+                            userModel.addUserWithPhone(user.getUid(), username, phoneNumber, password);
+                            Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
+                            intent.putExtra("username", username);
+                            startActivity(intent);
+                            finish();
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -259,6 +274,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
         if (keyCode == KeyEvent.KEYCODE_DEL) {
+            Log.e(TAG, "onKeyUp: otpSelection " + otpSelection );
             switch (otpSelection) {
                 case 6:
                     otpSelection = 5;

@@ -62,6 +62,7 @@ public class BoardingActivity extends AppCompatActivity {
                         Intent loginIntent = new Intent(BoardingActivity.this, SignInActivity.class);
                         startActivity(loginIntent);
                         finish();
+                        return;
                     }
                     Intent intent = new Intent(BoardingActivity.this, MainActivity.class);
                     startActivity(intent);

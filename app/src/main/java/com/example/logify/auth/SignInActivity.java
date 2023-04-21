@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import com.example.logify.MainActivity;
 import com.example.logify.R;
+import com.example.logify.entities.User;
+import com.example.logify.models.UserModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -23,7 +25,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignInActivity extends AppCompatActivity {
     TextInputEditText edtPhoneNumber, edtPassword;
@@ -33,9 +38,9 @@ public class SignInActivity extends AppCompatActivity {
 
     GoogleSignInClient mGoogleSignInClient;
     FirebaseAuth mAuth;
-
+    DatabaseReference database;
     Dialog dialog;
-
+    UserModel userModel;
 
     private static final int RC_SIGN_IN = 123;
     private static String TAG = "SignInActivity";
@@ -97,12 +102,16 @@ public class SignInActivity extends AppCompatActivity {
         tvRegisterHref = findViewById(R.id.tvRegisterHref);
 
         mAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance().getReference();
+        userModel = new UserModel(database);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         dialog = new Dialog(this);
+
+//        fill input if user is have login
     }
 
     private void handleLogin() {
@@ -150,6 +159,7 @@ public class SignInActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.d(TAG, "onActivityResult: " + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
+//                get userId
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -162,6 +172,10 @@ public class SignInActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "firebaseAuthWithGoogle: success");
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        Log.e(TAG, "firebaseAuthWithGoogle: user " + user.getDisplayName());
+                        userModel.addUserWithGoogle(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl());
                         Intent intent = new Intent(SignInActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -170,6 +184,7 @@ public class SignInActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
+
                     Log.d(TAG, "firebaseAuthWithGoogle: " + e.getMessage());
                 });
     }

@@ -61,6 +61,8 @@
                 android:layout_gravity="center_vertical"
                 android:background="@android:color/transparent"
                 android:hint="@string/user_name"
+                android:textColorHint="@color/fifty_percent_black_overlay"
+                android:textColor="@color/fifty_percent_black_overlay"
                 android:inputType="text"
                 android:textSize="@dimen/_14sp"
                 tools:ignore="TouchTargetSizeCheck" />
@@ -83,8 +85,10 @@
                 android:layout_gravity="center_vertical"
                 android:background="@android:color/transparent"
                 android:hint="@string/phone_number"
+                android:textColorHint="@color/fifty_percent_black_overlay"
                 android:inputType="phone"
                 android:textSize="@dimen/_14sp"
+                android:textColor="@color/fifty_percent_black_overlay"
                 tools:ignore="TouchTargetSizeCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -105,7 +109,9 @@
                 android:layout_gravity="center_vertical"
                 android:background="@android:color/transparent"
                 android:hint="@string/password"
-                android:inputType="phone"
+                android:textColorHint="@color/fifty_percent_black_overlay"
+                android:inputType="textPassword"
+                android:textColor="@color/fifty_percent_black_overlay"
                 android:textSize="@dimen/_14sp"
                 tools:ignore="TouchTargetSizeCheck" />
         </com.google.android.material.textfield.TextInputLayout>

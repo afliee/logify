@@ -33,6 +33,8 @@ public class RegisterActivity extends AppCompatActivity {
     PhoneAuthOptions options;
 
     String verificationId = "";
+//    String recentToken = "";
+    PhoneAuthProvider.ForceResendingToken recentToken;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
     @Override
@@ -130,6 +132,8 @@ public class RegisterActivity extends AppCompatActivity {
                 otpIntent.putExtra("verificationId", s);
                 otpIntent.putExtra("username", edtUsername.getText().toString().trim());
                 otpIntent.putExtra("phoneNumber", edtPhoneNumber.getText().toString().trim());
+                otpIntent.putExtra("password", edtPassword.getText().toString().trim());
+                otpIntent.putExtra("recentToken", forceResendingToken);
                 verificationId = s;
                 startActivity(otpIntent);
                 finish();
