@@ -35,7 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
     UserModel userModel;
 
     String verificationId = "";
-//    String recentToken = "";
+    //    String recentToken = "";
     PhoneAuthProvider.ForceResendingToken recentToken;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
@@ -97,12 +97,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         userModel.checkUserIsExist(phoneNumber, new UserModel.CheckUserExistCallBacks() {
             @Override
-            public void onExist(boolean isExist) {
-                if (isExist) {
-                    edtPhoneNumber.setError("Phone number is already exist");
-                    edtPhoneNumber.setFocusable(true);
-                    return;
-                }
+            public void onExist() {
+                edtPhoneNumber.setError("Phone number is already exist");
+                edtPhoneNumber.setFocusable(true);
             }
 
             @Override
@@ -132,12 +129,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
                 Log.d(TAG, "onVerificationCompleted: verification completed");
-
             }
 
             @Override
             public void onVerificationFailed(@NonNull FirebaseException e) {
-                Log.d(TAG, "onVerificationFailed: failed to verify "  + e.getMessage());
+                Log.d(TAG, "onVerificationFailed: failed to verify " + e.getMessage());
                 btnRegister.setEnabled(false);
             }
 
@@ -151,6 +147,7 @@ public class RegisterActivity extends AppCompatActivity {
                 otpIntent.putExtra("phoneNumber", edtPhoneNumber.getText().toString().trim());
                 otpIntent.putExtra("password", edtPassword.getText().toString().trim());
                 otpIntent.putExtra("recentToken", forceResendingToken);
+                otpIntent.putExtra("actionOption", OTPVerifyActivity.REGISTRATION);
                 verificationId = s;
                 startActivity(otpIntent);
                 finish();

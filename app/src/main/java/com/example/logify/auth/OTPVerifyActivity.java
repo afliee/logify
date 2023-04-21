@@ -47,6 +47,8 @@ public class OTPVerifyActivity extends AppCompatActivity {
     String verificationId = "";
     String phoneNumber = "";
     String username = "";
+    private String newPassword = "";
+
     String password = "";
     UserModel userModel;
     FirebaseAuth mAuth;
@@ -55,9 +57,13 @@ public class OTPVerifyActivity extends AppCompatActivity {
     private boolean isRecent = false;
     private final int recentTimer = 60;
     private int otpSelection = 0;
+    private int actionOption = 0;
     private static final String COUNTRY_CODE = "+84";
 
     private static final String TAG = "OTPVerifyActivity";
+
+    public static final int REGISTRATION = 1;
+    public static final int FORGOT_PASSWORD = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +108,18 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
                 if (verificationId != null) {
                     PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-                    signInWithPhoneAuthCredential(credential);
+                    Log.e(TAG, "onClick: action Option: " + actionOption);
+                    switch (actionOption) {
+                        case REGISTRATION:
+                            signInWithPhoneAuthCredential(credential);
+                            break;
+                        case FORGOT_PASSWORD:
+                            resetPasswordAuthCredential(credential);
+                            break;
+                        default:
+                            Toast.makeText(OTPVerifyActivity.this, "Something went wrong when try authentication", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
                 }
             }
         });
@@ -156,6 +173,8 @@ public class OTPVerifyActivity extends AppCompatActivity {
         verificationId = intent.getStringExtra("verificationId");
         username = intent.getStringExtra("username");
         password = intent.getStringExtra("password");
+        actionOption = intent.getIntExtra("actionOption", 0);
+        newPassword = intent.getStringExtra("newPassword");
     }
 
     private void countTimer() {
@@ -186,7 +205,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential: success");
+                            Log.d(TAG, "signInWithCredential: success login with phone number");
 
                             FirebaseUser user = task.getResult().getUser();
                             // Create a new user with a first and last name
@@ -210,7 +229,37 @@ public class OTPVerifyActivity extends AppCompatActivity {
                     }
                 });
     }
+    private void resetPasswordAuthCredential(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential: success to reset password");
 
+                            FirebaseUser user = task.getResult().getUser();
+                            // Create a new user with a first and last name
+                            userModel.updatePassword(user.getUid(), newPassword);
+                            SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("uuid", user.getUid());
+                            editor.apply();
+                            Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
+                            intent.putExtra("username", username);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            // Sign in failed, display a message and update the UI
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                                // The verification code entered was invalid
+                                Toast.makeText(OTPVerifyActivity.this, "Some thing went wrong ", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                });
+    }
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {

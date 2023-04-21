@@ -1,10 +1,12 @@
 package com.example.logify.models;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.logify.auth.ForgotPasswordActivity;
 import com.example.logify.auth.OTPVerifyActivity;
 import com.example.logify.entities.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,13 +24,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 //this class is used to store data of user reference to firebase
 public class UserModel {
     private static final String TAG = "UserModel";
     private static final String USER_COLLECTION = "users";
+    private static final String COUNTRY_CODE = "+84";
     private DatabaseReference database;
 
     private PhoneAuthOptions options;
@@ -47,7 +49,7 @@ public class UserModel {
     }
 
     public interface CheckUserExistCallBacks {
-        void onExist(boolean isExist);
+        void onExist();
         void onNotFound();
     }
 
@@ -207,7 +209,7 @@ public class UserModel {
                 }
 
                 if (isFound) {
-                    callBacks.onExist(true);
+                    callBacks.onExist();
                 } else {
                     callBacks.onNotFound();
                 }
@@ -219,5 +221,41 @@ public class UserModel {
             }
         });
 
+    }
+
+    public void forgotPassword(String phoneNumber, String newPassword, ForgotPasswordActivity forgotPasswordActivity) {
+        options = PhoneAuthOptions.newBuilder()
+                .setPhoneNumber(COUNTRY_CODE + phoneNumber)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(forgotPasswordActivity)
+                .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    @Override
+                    public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+
+                    }
+
+                    @Override
+                    public void onVerificationFailed(@NonNull FirebaseException e) {
+
+                    }
+
+                    @Override
+                    public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                        super.onCodeSent(s, forceResendingToken);
+
+                        Intent intent = new Intent(forgotPasswordActivity, OTPVerifyActivity.class);
+                        intent.putExtra("phoneNumber", phoneNumber);
+                        intent.putExtra("newPassword", newPassword);
+                        intent.putExtra("verificationId", s);
+                        intent.putExtra("actionOption", OTPVerifyActivity.FORGOT_PASSWORD);
+                        forgotPasswordActivity.startActivity(intent);
+                    }
+                }).build();
+
+        PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    public void updatePassword(String uuid, String newPassword) {
+        database.child(USER_COLLECTION).child(uuid).child("password").setValue(newPassword);
     }
 }
