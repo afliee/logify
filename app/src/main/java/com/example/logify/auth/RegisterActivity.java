@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.logify.R;
+import com.example.logify.models.UserModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     PhoneAuthProvider provider;
     PhoneAuthOptions options;
+    UserModel userModel;
 
     String verificationId = "";
 //    String recentToken = "";
@@ -93,13 +95,27 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        options = PhoneAuthOptions.newBuilder(mAuth)
-                .setPhoneNumber(COUNTRY_CODE + phoneNumber)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(this)
-                .setCallbacks(mCallbacks)
-                .build();
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(options);
+        userModel.checkUserIsExist(phoneNumber, new UserModel.CheckUserExistCallBacks() {
+            @Override
+            public void onExist(boolean isExist) {
+                if (isExist) {
+                    edtPhoneNumber.setError("Phone number is already exist");
+                    edtPhoneNumber.setFocusable(true);
+                    return;
+                }
+            }
+
+            @Override
+            public void onNotFound() {
+                options = PhoneAuthOptions.newBuilder(mAuth)
+                        .setPhoneNumber(COUNTRY_CODE + phoneNumber)
+                        .setTimeout(60L, TimeUnit.SECONDS)
+                        .setActivity(RegisterActivity.this)
+                        .setCallbacks(mCallbacks)
+                        .build();
+                PhoneAuthProvider.getInstance().verifyPhoneNumber(options);
+            }
+        });
     }
 
     private void init() {
@@ -111,6 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
         tvLoginHref = findViewById(R.id.tvLoginHref);
 
         mAuth = FirebaseAuth.getInstance();
+        userModel = new UserModel();
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {

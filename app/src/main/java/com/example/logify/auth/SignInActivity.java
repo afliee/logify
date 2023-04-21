@@ -1,16 +1,20 @@
 package com.example.logify.auth;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.logify.MainActivity;
 import com.example.logify.R;
@@ -27,8 +31,12 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SignInActivity extends AppCompatActivity {
     TextInputEditText edtPhoneNumber, edtPassword;
@@ -38,9 +46,12 @@ public class SignInActivity extends AppCompatActivity {
 
     GoogleSignInClient mGoogleSignInClient;
     FirebaseAuth mAuth;
+    PhoneAuthOptions options;
+
     DatabaseReference database;
     Dialog dialog;
     UserModel userModel;
+    String uuid = "";
 
     private static final int RC_SIGN_IN = 123;
     private static String TAG = "SignInActivity";
@@ -111,7 +122,9 @@ public class SignInActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         dialog = new Dialog(this);
 
-//        fill input if user is have login
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        uuid = sharedPreferences.getString("uuid", "");
+
     }
 
     private void handleLogin() {
@@ -137,10 +150,51 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
-//        if all is ok, then login
-        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
+        if (!TextUtils.isEmpty(uuid)) {
+            Log.e(TAG, "handleLogin: login with uuid " + uuid);
+            userModel.login(uuid, phoneNumber, password, new UserModel.LoginCallBacks() {
+                @Override
+                public void onCompleted(User user) {
+                    if (user != null) {
+                        Log.e(TAG, "onCompleted: Login success " + user.getPhoneNumber());
+                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(SignInActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+            });
+        } else {
+            Log.e(TAG, "handleLogin: login without uuid ");
+            userModel.login(phoneNumber, password, new UserModel.LoginCallBacks() {
+                @Override
+                public void onCompleted(User user) {
+                    if (user != null) {
+                        Log.e(TAG, "onCompleted: Login success " + user.getPhoneNumber());
+                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        
+                        Log.e(TAG, "onCompleted: loggin failed");
+                        Toast.makeText(SignInActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure() {
+                    Log.e(TAG, "onFailure: failed to login without uuid");
+                    Toast.makeText(SignInActivity.this, "Data Invalid!!!", Toast.LENGTH_SHORT).show();
+                    edtPhoneNumber.requestFocus();
+                }
+            });
+        }
     }
 
     private void handleLoginWithGG() {
@@ -187,6 +241,23 @@ public class SignInActivity extends AppCompatActivity {
 
                     Log.d(TAG, "firebaseAuthWithGoogle: " + e.getMessage());
                 });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+    }
+
+    public void updataUI(FirebaseUser user) {
+        if (user != null) {
+            Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

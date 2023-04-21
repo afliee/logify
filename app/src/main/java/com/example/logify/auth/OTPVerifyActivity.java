@@ -191,6 +191,10 @@ public class OTPVerifyActivity extends AppCompatActivity {
                             FirebaseUser user = task.getResult().getUser();
                             // Create a new user with a first and last name
                             userModel.addUserWithPhone(user.getUid(), username, phoneNumber, password);
+                            SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("uuid", user.getUid());
+                            editor.apply();
                             Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
                             intent.putExtra("username", username);
                             startActivity(intent);

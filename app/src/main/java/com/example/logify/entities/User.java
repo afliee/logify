@@ -67,6 +67,14 @@ public class User {
         this.password = password;
     }
 
+    public String getAvatar() {
+        return avatar.toString();
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = Uri.parse(avatar);
+    }
+
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
 
@@ -85,5 +93,16 @@ public class User {
             result.put("avatar", avatar.toString());
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "uuid='" + uuid + '\'' +
+                ", username='" + username + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
+                ", avatar=" + avatar +
+                '}';
     }
 }
