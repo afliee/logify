@@ -21,7 +21,6 @@ import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.logify.R;
 import com.example.logify.adapters.CategoryAdapter;
-import com.example.logify.animations.ExpandCollapseAnimation;
 import com.example.logify.entities.Category;
 import com.example.logify.entities.Topic;
 
@@ -39,9 +38,6 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
     private ImageSlider imageSlider;
     private RecyclerView rcvCategory;
-    private CardView cardViewSlide;
-    private boolean mIsCardViewExpanded = true;
-    private LinearLayout cardLayout;
     private Activity activity;
 
     public HomeFragment() {
@@ -88,8 +84,6 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View convertView = inflater.inflate(R.layout.fragment_home, container, false);
         imageSlider = convertView.findViewById(R.id.imageSlider);
-        cardViewSlide = convertView.findViewById(R.id.cardViewSlide);
-        cardLayout = convertView.findViewById(R.id.cardLayout);
         setImageList();
 
 //        set up the recycler view for each category
@@ -144,58 +138,6 @@ public class HomeFragment extends Fragment {
         categories.add(new Category(UUID.randomUUID().toString(), "Music 4", topics));
         categoryAdapter.setCategories(categories);
         rcvCategory.setAdapter(categoryAdapter);
-        rcvCategory.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (!mIsCardViewExpanded) {
-                        ExpandCollapseAnimation expandAnimation = new ExpandCollapseAnimation(cardViewSlide, cardViewSlide.getMeasuredHeight(), cardViewSlide.getHeight(), true);
-                        cardViewSlide.startAnimation(expandAnimation);
-
-                        mIsCardViewExpanded = true;
-                    }
-                }
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                Log.w(TAG, "onScrolled: dy " + dy);
-
-                if (dy > 0) {
-                    int visibleItemCount = recyclerView.getLayoutManager().getChildCount();
-                    int totalItemCount = recyclerView.getLayoutManager().getItemCount();
-                    int pastVisibleItems = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                    String temp = "visibleItemCount = " + visibleItemCount + " totolItemCount = " + totalItemCount + "pastVisiableItem = " + pastVisibleItems;
-                    Log.e(TAG, "onScrolled: display infor " + temp);
-//                    if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
-//                        // Reached the bottom of RecyclerView
-//                        cardLayout.setVisibility(View.GONE);
-//                    }
-                    if (visibleItemCount >= totalItemCount / 2 ) {
-                        cardLayout.setVisibility(View.GONE);
-                    }
-                } else {
-                    if (cardLayout.getVisibility() != View.VISIBLE) {
-                        cardLayout.setVisibility(View.VISIBLE);
-                    }
-
-                    int[] location = new int[2];
-                    cardLayout.getLocationOnScreen(location);
-                    int y = location[1];
-
-                    if (y < 0 && mIsCardViewExpanded) {
-                        // Collapse card view
-                        ExpandCollapseAnimation collapseAnimation = new ExpandCollapseAnimation(cardViewSlide, cardViewSlide.getMeasuredHeight(), cardViewSlide.getHeight(), false);
-                        cardViewSlide.startAnimation(collapseAnimation);
-
-                        mIsCardViewExpanded = false;
-                    }
-                }
-            }
-        });
     }
 
 
