@@ -27,16 +27,15 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.concurrent.TimeUnit;
 
 //this class is used to store data of user reference to firebase
-public class UserModel {
+public class UserModel extends Model{
     private static final String TAG = "UserModel";
     private static final String USER_COLLECTION = "users";
     private static final String COUNTRY_CODE = "+84";
-    private DatabaseReference database;
+//    private DatabaseReference database;
 
     private PhoneAuthOptions options;
-    private FirebaseAuth mAuth;
+//    private FirebaseAuth mAuth;
     private String vetificationId = "";
-
 
 
     public interface UserCallBacks {
@@ -54,12 +53,10 @@ public class UserModel {
     }
 
     public UserModel() {
-        database = FirebaseDatabase.getInstance().getReference();
-        mAuth = FirebaseAuth.getInstance();
+        super();
     }
     public UserModel(DatabaseReference database) {
-        this.database = database;
-        mAuth = FirebaseAuth.getInstance();
+        super(database);
         database.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -73,9 +70,6 @@ public class UserModel {
         });
     }
 
-    public DatabaseReference getDatabase() {
-        return database;
-    }
 
     public void addUserWithPhone(String uuid, String username, String phoneNumber, String password) {
         User user = new User(uuid, username, phoneNumber, password);
