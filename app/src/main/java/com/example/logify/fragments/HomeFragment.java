@@ -8,7 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.denzcoskun.imageslider.ImageSlider;
+import com.denzcoskun.imageslider.constants.ScaleTypes;
+import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.logify.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -61,6 +67,15 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View convertView = inflater.inflate(R.layout.fragment_home, container, false);
+        ImageSlider imageSlider = convertView.findViewById(R.id.imageSlider);
+        List<SlideModel> slideModels = new ArrayList<>();
+        slideModels.add(new SlideModel(R.drawable.title_slide, ScaleTypes.CENTER_CROP));
+        slideModels.add(new SlideModel(R.drawable.image_slider_1, ScaleTypes.CENTER_CROP));
+        slideModels.add(new SlideModel(R.drawable.image_slider_1, ScaleTypes.CENTER_CROP));
+
+        imageSlider.setImageList(slideModels, ScaleTypes.CENTER_CROP);
+
+        return convertView;
     }
 }

@@ -3,12 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.HomeFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Home Fragment" />
+        android:layout_height="230dp"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="10dp" >
+
+        <com.denzcoskun.imageslider.ImageSlider
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageSlider"
+            app:iss_period="1000"
+            app:iss_delay="0"
+            app:iss_auto_cycle="true"
+            app:iss_corner_radius="10"
+            app:iss_unselected_dot="@color/transparent"
+            app:iss_selected_dot="@color/transparent"
+            app:iss_title_background="@drawable/title_slide"/>
+    </androidx.cardview.widget.CardView>
 
 </FrameLayout>

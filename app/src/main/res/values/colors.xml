@@ -98,7 +98,7 @@
     <color name="flatGreenEnd">#00BF84</color>
     <color name="transparent">#00000000</color>
     <color name="blue_primary">#4991FD</color>
-
+    <color name="blue_primary_light">#8FBBFE</color>
     <color name="inactive">#DBF0FF</color>
     <color name="active">#0ca6f9</color>
 

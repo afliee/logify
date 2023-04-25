@@ -50,4 +50,6 @@
     <dimen name="_50dp">50dp</dimen>
     <dimen name="_12dp">12dp</dimen>
     <dimen name="floating_image_size">40dp</dimen>
+    <dimen name="_200dp">200dp</dimen>
+    <dimen name="_30dp">30dp</dimen>
 </resources>
