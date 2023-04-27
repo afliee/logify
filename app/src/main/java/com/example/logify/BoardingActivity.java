@@ -45,7 +45,7 @@ public class BoardingActivity extends AppCompatActivity {
         btnSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(BoardingActivity.this, MainActivity.class);
+                Intent intent = new Intent(BoardingActivity.this, SignInActivity.class);
                 startActivity(intent);
                 finish();
             }

@@ -1,22 +1,35 @@
 package com.example.logify.services;
 
+import static com.example.logify.R.color.black;
+
+import android.Manifest;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.logify.MainActivity;
 import com.example.logify.MainApplication;
 import com.example.logify.R;
 import com.example.logify.entities.Song;
+
+import java.net.URL;
 
 public class SongService extends Service {
     private static final String TAG = "SongService";
@@ -67,29 +80,45 @@ public class SongService extends Service {
     }
 
 //    handle below
+
+
     private void start(Song song) {
         mediaPlayer = MediaPlayer.create(this, R.raw.traditiontal_song);
         mediaPlayer.start();
     }
+
+
     private void sendNotification(Song song) {
         Log.e(TAG, "sendNotification: " + song.toString());
 
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification);
-        remoteViews.setImageViewResource(R.id.image, R.drawable.image_song);
-        remoteViews.setTextViewText(R.id.title, song.getName());
-        remoteViews.setTextViewText(R.id.text, song.getArtistId());
-
+        MediaSessionCompat sessionCompat = new MediaSessionCompat(this, TAG);
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-
-        Notification notification = new Notification.Builder(this, MainApplication.CHANNEL_ID)
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image_song);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, MainApplication.CHANNEL_ID)
                 .setSmallIcon(R.drawable.logo_small)
+                .setLargeIcon(bitmap)
+                .setSubText("Logify")
                 .setContentIntent(pendingIntent)
-                .setCustomContentView(remoteViews)
-                .setCustomBigContentView(remoteViews)
-                .build();
+                .setContentText(song.getArtistId())
+                .setContentTitle(song.getName())
+                .addAction(R.drawable.baseline_skip_previous_24, "Previous", null)
+                .addAction(R.drawable.baseline_play_arrow_24, "Play", null)
+                .addAction(R.drawable.baseline_skip_next_24, "Next", null)
+                .addAction(R.drawable.baseline_clear_24, "Close", null)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(1)
+                        .setMediaSession(sessionCompat.getSessionToken())
+                );
 
-        startForeground(1, notification);
+//        try {
+//            URL picture_url = song.getImageSong();
+//            Bitmap picture = BitmapFactory.decodeStream(picture_url.openConnection().getInputStream());
+//            notification.setStyle(new Notification.BigPictureStyle().bigPicture(picture));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        startForeground(1, notificationBuilder.build());
     }
 }

@@ -1,8 +1,12 @@
 package com.example.logify;
 
+import static androidx.core.app.ActivityCompat.requestPermissions;
+
+import android.Manifest;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.pm.PackageManager;
 import android.os.Build;
 
 public class MainApplication extends Application {
@@ -14,6 +18,7 @@ public class MainApplication extends Application {
         super.onCreate();
 
         createNotificationChannel();
+
     }
 
     private void createNotificationChannel() {
@@ -22,7 +27,7 @@ public class MainApplication extends Application {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Logify", NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription("Logify");
             NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
+            if (manager != null && manager.areNotificationsEnabled()) {
                 manager.createNotificationChannel(channel);
             }
         }
