@@ -1,17 +1,19 @@
 package com.example.logify.entities;
 
-public class Song {
+import java.io.Serializable;
+
+public class Song implements Serializable {
     private String id;
     private String name;
     private String artistId;
-    private int duration;
+    private String resource;
     private String releaseDate;
 
-    public Song(String id, String name, String artistId, int duration, String releaseDate) {
+    public Song(String id, String name, String artistId, String resource, String releaseDate) {
         this.id = id;
         this.name = name;
         this.artistId = artistId;
-        this.duration = duration;
+        this.resource = resource;
         this.releaseDate = releaseDate;
     }
 
@@ -39,12 +41,12 @@ public class Song {
         this.artistId = artistId;
     }
 
-    public int getDuration() {
-        return duration;
+    public String getResource() {
+        return resource;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
     public String getReleaseDate() {
@@ -56,12 +58,13 @@ public class Song {
     }
 
     @Override
-    public String toString() {
+    public String
+    toString() {
         return "Song{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", artistId='" + artistId + '\'' +
-                ", duration=" + duration +
+                ", resource='" + resource + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +
                 '}';
     }

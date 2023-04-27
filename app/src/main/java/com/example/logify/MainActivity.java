@@ -16,15 +16,19 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.logify.auth.SignInActivity;
+import com.example.logify.entities.Song;
 import com.example.logify.fragments.AboutUsFragment;
 import com.example.logify.fragments.HomeFragment;
 import com.example.logify.fragments.PlaylistFragment;
 import com.example.logify.fragments.ProfileFragment;
 import com.example.logify.fragments.SearchFragment;
 import com.example.logify.fragments.SettingFragment;
+import com.example.logify.services.SongService;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -32,11 +36,13 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.time.LocalTime;
 import java.util.Date;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
+    private ImageView btnPlayPause;
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnItemSelectedListener onItemSelectedListener;
     @Override
@@ -48,9 +54,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        btnPlayPause = findViewById(R.id.play_pause);
+
         mAuth = FirebaseAuth.getInstance();
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        handleBottomBehavior();
 
 //        set title action bar
         String titleApp = "";
@@ -76,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
-        bottomNavigationView.setBackground(null);
-        bottomNavigationView.setBackgroundColor(Color.TRANSPARENT);
+//        bottomNavigationView.setBackground(null);
+//        bottomNavigationView.setBackgroundColor(Color.TRANSPARENT);
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -114,6 +125,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.commit();
     }
 //    out of onCreate
+
+
+    private void handleBottomBehavior() {
+        btnPlayPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Play/Pause", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, SongService.class);
+//                temporary data
+                Song song = new Song(
+                        UUID.randomUUID().toString(),
+                        "Thang Tu La Loi Noi Doi Cua Em",
+                        "1",
+                        "https://mp3-320s1-zmp3.zmdcdn.me/ff75ee453401dd5f8410/1589336670738807709?authen=exp=1682771660~acl=/ff75ee453401dd5f8410/*~hmac=15d5370855337fd1a7e9fd67d56b08b4&fs=MTY4MjU5ODg2MDI0MHx3ZWJWNnwwfDIyMi4yNTIdUngMjkdUngMTI0",
+                        LocalTime.now().toString()
+                );
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("song", song);
+                intent.putExtras(bundle);
+                startService(intent);
+            }
+        });
+    }
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {

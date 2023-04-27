@@ -14,9 +14,6 @@
         />
 
     <item
-        android:title=""/>
-
-    <item
         android:id="@+id/bottom_playlist"
         android:title="@string/playlists"
         android:icon="@drawable/playlist" />
