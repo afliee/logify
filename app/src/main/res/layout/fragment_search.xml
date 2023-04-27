@@ -5,11 +5,31 @@
     android:layout_height="match_parent"
     tools:context=".fragments.SearchFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Search Fragment"
-        android:layout_gravity="center"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/edtSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/background_border_grey"
+            android:drawableLeft="@drawable/baseline_search_24"
+            android:drawablePadding="4dp"
+            android:ems="10"
+            android:hint="What do you want to listen to?"
+            android:inputType="textPersonName"
+            android:imeOptions="actionDone"
+            android:padding="10dp"
+            android:textSize="18sp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcvSearchSuggest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp" />
+    </LinearLayout>
 
 </FrameLayout>
