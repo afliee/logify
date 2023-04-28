@@ -26,8 +26,9 @@ public class MainApplication extends Application {
 //            create channel id
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Logify", NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription("Logify");
+            channel.setSound(null, null);
             NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null && manager.areNotificationsEnabled()) {
+            if (manager != null) {
                 manager.createNotificationChannel(channel);
             }
         }

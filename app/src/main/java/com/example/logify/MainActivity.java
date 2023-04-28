@@ -1,11 +1,11 @@
 package com.example.logify;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -13,9 +13,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -26,9 +29,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.logify.auth.SignInActivity;
+import com.example.logify.constants.App;
 import com.example.logify.entities.Song;
 import com.example.logify.fragments.AboutUsFragment;
 import com.example.logify.fragments.HomeFragment;
@@ -37,6 +44,7 @@ import com.example.logify.fragments.ProfileFragment;
 import com.example.logify.fragments.SearchFragment;
 import com.example.logify.fragments.SettingFragment;
 import com.example.logify.services.SongService;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -53,20 +61,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private BottomNavigationView bottomNavigationView;
     private ImageView btnPlayPause;
     private FirebaseAuth mAuth;
-    private BottomNavigationView.OnItemSelectedListener onItemSelectedListener;
+    private CardView bottomCurrentSong;
+    private ShapeableImageView albumArt;
+    private TextView songTitle, songArtist;
+    private Song currentSong;
+    private boolean isPlaying = false;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle == null) return;
+            if (bundle.containsKey("song")) {
+                currentSong = (Song) bundle.getSerializable(App.CURRENT_SONG);
+                isPlaying = bundle.getBoolean(App.IS_PLAYING);
+                int action = bundle.getInt(App.ACTION_TYPE);
+                handleLayoutCurrentSong(action);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         handlePermission();
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, SongService.getIntentFilter());
+
         Toolbar toolbar = findViewById(R.id.toolbar); //Ignore red line errors
 
         setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        btnPlayPause = findViewById(R.id.play_pause);
 
+//        bottom current song
+        btnPlayPause = findViewById(R.id.play_pause);
+        bottomCurrentSong = findViewById(R.id.bottom_current_song);
+        albumArt = findViewById(R.id.album_art);
+        songTitle = findViewById(R.id.song_title);
+        songArtist = findViewById(R.id.song_artist);
+
+//        authurization mapping
         mAuth = FirebaseAuth.getInstance();
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -160,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         UUID.randomUUID().toString(),
                         "Thang Tu La Loi Noi Doi Cua Em",
                         "1",
+                        "https://photo-zmp3.zmdcdn.me/cover/5/d/c/f/5dcf39a2a590e3f43927a55d0c37866b.jpg",
                         "https://mp3-320s1-zmp3.zmdcdn.me/ff75ee453401dd5f8410/1589336670738807709?authen=exp=1682771660~acl=/ff75ee453401dd5f8410/*~hmac=15d5370855337fd1a7e9fd67d56b08b4&fs=MTY4MjU5ODg2MDI0MHx3ZWJWNnwwfDIyMi4yNTIdUngMjkdUngMTI0",
                         LocalTime.now().toString()
                 );
@@ -167,9 +204,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("song", song);
                 intent.putExtras(bundle);
+                if (isPlaying) {
+                    intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PAUSE);
+                } else {
+                    intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PLAY);
+                }
                 startService(intent);
             }
         });
+    }
+
+    private void handleLayoutCurrentSong(int action) {
+        switch (action) {
+            case SongService.ACTION_START: {
+                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action);
+                bottomCurrentSong.setVisibility(View.VISIBLE);
+                updateCurrentSongUI();
+                updateStatusUI();
+                break;
+            }
+            case SongService.ACTION_PAUSE:
+            case SongService.ACTION_RESUME:{
+                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action);
+                updateStatusUI();
+                break;
+            }
+            case SongService.ACTION_CLOSE: {
+                Log.e(TAG, "handleLayoutCurrentSong: hide current song bottom");
+                bottomCurrentSong.setVisibility(View.GONE);
+                break;
+            }
+
+        }
+    }
+
+    private void updateCurrentSongUI() {
+        if (currentSong != null) {
+            bottomCurrentSong.setVisibility(View.VISIBLE);
+            songTitle.setText(currentSong.getName());
+            songArtist.setText(currentSong.getArtistId());
+            Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
+        }
+    }
+
+    private void updateStatusUI() {
+        if (isPlaying) {
+            btnPlayPause.setImageResource(R.drawable.baseline_pause_24);
+        } else {
+            btnPlayPause.setImageResource(R.drawable.baseline_play_arrow_24);
+        }
+    }
+
+    private void sendBroadcastToService(int action) {
+        Intent intent = new Intent(this, SongService.class);
+        intent.putExtra(App.ACTION_TYPE, action);
+        startService(intent);
     }
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -217,5 +306,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 }

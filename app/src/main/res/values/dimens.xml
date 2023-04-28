@@ -56,4 +56,6 @@
 
     <dimen name="notification_big_image_size">128dp</dimen>
     <dimen name="current_song_size">54dp</dimen>
+    <dimen name="_150dp">150dp</dimen>
+    <dimen name="_180dp">180dp</dimen>
 </resources>

@@ -71,7 +71,7 @@
                 android:id="@+id/play_pause"
                 android:layout_width="@dimen/_32dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_play_white_36dp"/>
+                android:src="@drawable/baseline_play_arrow_24" />
         </LinearLayout>
     </RelativeLayout>
 

@@ -6,13 +6,16 @@ public class Song implements Serializable {
     private String id;
     private String name;
     private String artistId;
+    private String imageResource;
     private String resource;
     private String releaseDate;
 
-    public Song(String id, String name, String artistId, String resource, String releaseDate) {
+
+    public Song(String id, String name, String artistId, String imageResource, String resource, String releaseDate) {
         this.id = id;
         this.name = name;
         this.artistId = artistId;
+        this.imageResource = imageResource;
         this.resource = resource;
         this.releaseDate = releaseDate;
     }
@@ -41,6 +44,14 @@ public class Song implements Serializable {
         this.artistId = artistId;
     }
 
+    public String getImageResource() {
+        return imageResource;
+    }
+
+    public void setImageResource(String imageResource) {
+        this.imageResource = imageResource;
+    }
+
     public String getResource() {
         return resource;
     }
@@ -58,12 +69,12 @@ public class Song implements Serializable {
     }
 
     @Override
-    public String
-    toString() {
+    public String toString() {
         return "Song{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", artistId='" + artistId + '\'' +
+                ", imageResource='" + imageResource + '\'' +
                 ", resource='" + resource + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +
                 '}';

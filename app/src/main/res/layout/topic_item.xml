@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="@dimen/_200dp"
+    android:layout_width="@dimen/_180dp"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="@dimen/_10dp"
     android:id="@+id/cvTopicItem"
+    android:layout_marginBottom="@dimen/_10dp"
     android:layout_marginEnd="@dimen/_10dp"
     android:background="@color/transparent" >
 
@@ -18,7 +19,7 @@
         <ImageView
             android:id="@+id/imgTopic"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_200dp"
+            android:layout_height="@dimen/_150dp"
             android:scaleType="centerCrop"
             android:src="@drawable/album_placeholder" />
 
