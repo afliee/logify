@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.logify.R;
 import com.example.logify.entities.Artist;
-import com.example.logify.entities.Topic;
 
 import java.util.ArrayList;
 

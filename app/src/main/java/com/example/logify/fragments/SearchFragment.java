@@ -16,13 +16,10 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.logify.R;
 import com.example.logify.adapters.SearchSuggestAdapter;
 import com.example.logify.entities.Artist;
-import com.example.logify.entities.Category;
-import com.example.logify.entities.Topic;
 
 import java.time.LocalTime;
 import java.util.ArrayList;

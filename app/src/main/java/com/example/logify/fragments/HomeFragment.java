@@ -5,24 +5,21 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.logify.R;
-import com.example.logify.adapters.CategoryAdapter;
-import com.example.logify.entities.Category;
+import com.example.logify.adapters.TopicAdapter;
 import com.example.logify.entities.Topic;
+import com.example.logify.entities.Playlist;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -98,7 +95,7 @@ public class HomeFragment extends Fragment {
         if (activity == null) {
             return;
         }
-        CategoryAdapter categoryAdapter = new CategoryAdapter(getContext());
+        TopicAdapter topicAdapter = new TopicAdapter(getContext());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         rcvCategory.setLayoutManager(linearLayoutManager);
         rcvCategory.setNestedScrollingEnabled(true);
@@ -106,9 +103,9 @@ public class HomeFragment extends Fragment {
         /* set the adapter
          * temporary data
          */
-        ArrayList<Category> categories = new ArrayList<>();
         ArrayList<Topic> topics = new ArrayList<>();
-        topics.add(new Topic(
+        ArrayList<Playlist> playlists = new ArrayList<>();
+        playlists.add(new Playlist(
                 UUID.randomUUID().toString(),
                 "EDM",
                 "Electronic Dance Music",
@@ -116,7 +113,7 @@ public class HomeFragment extends Fragment {
                 LocalTime.now().toString()
         ));
 
-        topics.add(new Topic(
+        playlists.add(new Playlist(
                 UUID.randomUUID().toString(),
                 "Pop",
                 "Pop Music",
@@ -124,7 +121,7 @@ public class HomeFragment extends Fragment {
                 LocalTime.now().toString()
         ));
 
-        topics.add(new Topic(
+        playlists.add(new Playlist(
                 UUID.randomUUID().toString(),
                 "Rock",
                 "Rock Music",
@@ -132,12 +129,12 @@ public class HomeFragment extends Fragment {
                 LocalTime.now().toString()
         ));
 
-        categories.add(new Category(UUID.randomUUID().toString(), "Music 1", topics));
-        categories.add(new Category(UUID.randomUUID().toString(), "Music 2", topics));
-        categories.add(new Category(UUID.randomUUID().toString(), "Music 3", topics));
-        categories.add(new Category(UUID.randomUUID().toString(), "Music 4", topics));
-        categoryAdapter.setCategories(categories);
-        rcvCategory.setAdapter(categoryAdapter);
+        topics.add(new Topic(UUID.randomUUID().toString(), "Music 1", playlists));
+        topics.add(new Topic(UUID.randomUUID().toString(), "Music 2", playlists));
+        topics.add(new Topic(UUID.randomUUID().toString(), "Music 3", playlists));
+        topics.add(new Topic(UUID.randomUUID().toString(), "Music 4", playlists));
+        topicAdapter.setTopics(topics);
+        rcvCategory.setAdapter(topicAdapter);
     }
 
 

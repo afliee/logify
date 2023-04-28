@@ -17,9 +17,7 @@
         android:theme="@style/Theme.Logify"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <service
-            android:name=".services.SongService"
-            />
+        <service android:name=".services.SongService"/>
         <receiver android:name=".receivers.SongReceiver" />
         <activity
             android:name=".auth.ForgotPasswordActivity"
@@ -51,6 +49,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="false"

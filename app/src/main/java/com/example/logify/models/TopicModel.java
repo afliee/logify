@@ -1,18 +1,18 @@
 package com.example.logify.models;
 
-import com.example.logify.entities.Topic;
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.logify.entities.Playlist;
 
 import java.util.ArrayList;
 
 public class TopicModel extends Model {
+    private static final String COLLECTION_NAME = "topics";
     public TopicModel () {
         super();
     }
 
-    public ArrayList<Topic> getTopics() {
-        ArrayList<Topic> topics = new ArrayList<>();
+    public ArrayList<Playlist> getTopics() {
+        ArrayList<Playlist> playlists = new ArrayList<>();
         
-        return topics;
+        return playlists;
     }
 }
