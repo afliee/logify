@@ -54,7 +54,7 @@
     <string name="nav_logout">Logout</string>
     <string name="search">Search</string>
     <string name="profile">Profile</string>
-    <string name="playlists">Playlists</string>
+    <string name="albums">Playlists</string>
     <string name="alex_xid">Alex Xid</string>
     <string name="contact_email">contact@contact.com</string>
     <string name="open_nav">Open Navigator</string>

@@ -21,13 +21,11 @@ import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.logify.R;
 import com.example.logify.adapters.TopicAdapter;
 import com.example.logify.entities.Topic;
-import com.example.logify.entities.Playlist;
 import com.example.logify.models.TopicModel;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -110,6 +108,8 @@ public class HomeFragment extends Fragment {
             @Override
             public void onTopicsChanged(ArrayList<Topic> topics) {
                 Log.e(TAG, "onTopicsChanged: data " + topics.toString());
+//                shuffle the topics
+                Collections.shuffle(topics);
                 topicAdapter.setTopics(topics);
                 loader.setVisibility(View.GONE);
             }

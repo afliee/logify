@@ -15,7 +15,7 @@
 
     <item
         android:id="@+id/bottom_playlist"
-        android:title="@string/playlists"
+        android:title="@string/albums"
         android:icon="@drawable/playlist" />
     <item
         android:id="@+id/bottom_profile"

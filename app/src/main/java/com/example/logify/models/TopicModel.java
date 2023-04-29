@@ -1,8 +1,10 @@
 package com.example.logify.models;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
-import com.example.logify.entities.Playlist;
+import com.example.logify.entities.Album;
 import com.example.logify.entities.Topic;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,22 +39,22 @@ public class TopicModel extends Model {
                     topic.setId(dataSnapshot.getKey());
                     topic.setTitle(jsonObject.optString("title"));
                     JSONObject data = jsonObject.optJSONObject("data");
-                    ArrayList<Playlist> playlists = new ArrayList<>();
+                    ArrayList<Album> albums = new ArrayList<>();
                     Iterator<String> keys = data.keys();
                     while (keys.hasNext()) {
                         String key = keys.next();
                         JSONObject playlistObject = data.optJSONObject(key);
-                        Playlist playlist = new Playlist();
-                        playlist.setId(key);
-                        playlist.setName(playlistObject.optString("title"));
-                        playlist.setDescription(playlistObject.optString("sortDescription"));
-                        playlist.setImage(playlistObject.optString("thumbnail"));
+                        Album album = new Album();
+                        album.setId(key);
+                        album.setName(playlistObject.optString("title"));
+                        album.setDescription(playlistObject.optString("sortDescription"));
+                        album.setImage(playlistObject.optString("thumbnail"));
                         int releaseAt = playlistObject.optInt("releaseAt");
                         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                        playlist.setCreatedDate(dateFormat.format(releaseAt));
-                        playlists.add(playlist);
+                        album.setCreatedDate(dateFormat.format(releaseAt));
+                        albums.add(album);
                     }
-                    topic.setPlaylists(playlists);
+                    topic.setAlbums(albums);
                     topics.add(topic);
                 }
                 listener.onTopicsChanged(topics);
@@ -60,7 +62,7 @@ public class TopicModel extends Model {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.e(TAG, "onCancelled: an error occur " + error.getMessage());
             }
         });
     }

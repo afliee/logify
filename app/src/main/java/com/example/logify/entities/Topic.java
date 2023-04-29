@@ -8,17 +8,17 @@ import java.util.Map;
 public class Topic {
     private String id;
     private String title;
-    private ArrayList<Playlist> playlists;
-    private List<Playlist> data;
+    private ArrayList<Album> albums;
+    private List<Album> data;
 
 
     public Topic() {
     }
 
-    public Topic(String id, String title, ArrayList<Playlist> playlists) {
+    public Topic(String id, String title, ArrayList<Album> albums) {
         this.id = id;
         this.title = title;
-        this.playlists = playlists;
+        this.albums = albums;
     }
 
     public String getId() {
@@ -33,11 +33,11 @@ public class Topic {
         return title;
     }
 
-    public List<Playlist> getData() {
+    public List<Album> getData() {
         return data;
     }
 
-    public void setData(List<Playlist> data) {
+    public void setData(List<Album> data) {
         this.data = data;
     }
 
@@ -45,12 +45,12 @@ public class Topic {
         this.title = title;
     }
 
-    public ArrayList<Playlist> getPlaylists() {
-        return playlists;
+    public ArrayList<Album> getAlbums() {
+        return albums;
     }
 
-    public void setPlaylists(ArrayList<Playlist> playlists) {
-        this.playlists = playlists;
+    public void setAlbums(ArrayList<Album> albums) {
+        this.albums = albums;
     }
 
     public Map<String, Object> toMap() {
@@ -65,7 +65,7 @@ public class Topic {
         return "Topic{" +
                 "id='" + id + '\'' +
                 ", title='" + title + '\'' +
-                ", playlists=" + playlists +
+                ", playlists=" + albums +
                 '}';
     }
 }

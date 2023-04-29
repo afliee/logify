@@ -3,25 +3,27 @@ package com.example.logify.entities;
 public class Album {
     private String id;
     private String name;
-    private String artistId;
+    private String description;
     private String image;
-    private String sortDescription;
-    private int duration;
-    private int numberOfSongs;
-    private int numberOfLikes;
+    private String createdDate;
 
-    public Album() {
-    }
-
-    public Album(String id, String name, String artistId, String image, String sortDescription, int duration, int numberOfSongs, int numberOfLikes) {
+    /**
+     * This is a constructor method to create a new instance of Topic class.
+     * @param id
+     * @param name
+     * @param description
+     * @param image
+     * @param createdDate
+     */
+    public Album(String id, String name, String description, String image, String createdDate) {
         this.id = id;
         this.name = name;
-        this.artistId = artistId;
+        this.description = description;
         this.image = image;
-        this.sortDescription = sortDescription;
-        this.duration = duration;
-        this.numberOfSongs = numberOfSongs;
-        this.numberOfLikes = numberOfLikes;
+        this.createdDate = createdDate;
+    }
+
+    public Album() {
     }
 
     public String getId() {
@@ -40,12 +42,12 @@ public class Album {
         this.name = name;
     }
 
-    public String getArtistId() {
-        return artistId;
+    public String getDescription() {
+        return description;
     }
 
-    public void setArtistId(String artistId) {
-        this.artistId = artistId;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getImage() {
@@ -56,49 +58,24 @@ public class Album {
         this.image = image;
     }
 
-    public String getSortDescription() {
-        return sortDescription;
+    public String getCreatedDate() {
+        return createdDate;
     }
 
-    public void setSortDescription(String sortDescription) {
-        this.sortDescription = sortDescription;
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
     }
 
-    public int getDuration() {
-        return duration;
-    }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public int getNumberOfSongs() {
-        return numberOfSongs;
-    }
-
-    public void setNumberOfSongs(int numberOfSongs) {
-        this.numberOfSongs = numberOfSongs;
-    }
-
-    public int getNumberOfLikes() {
-        return numberOfLikes;
-    }
-
-    public void setNumberOfLikes(int numberOfLikes) {
-        this.numberOfLikes = numberOfLikes;
-    }
 
     @Override
     public String toString() {
-        return "Album{" +
+        return "Topic{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", artistId='" + artistId + '\'' +
+                ", description='" + description + '\'' +
                 ", image='" + image + '\'' +
-                ", sortDescription='" + sortDescription + '\'' +
-                ", duration=" + duration +
-                ", numberOfSongs=" + numberOfSongs +
-                ", numberOfLikes=" + numberOfLikes +
+                ", createdDate='" + createdDate + '\'' +
                 '}';
     }
 }

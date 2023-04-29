@@ -55,9 +55,9 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
 
         holder.tvCategoryName.setText(topic.getTitle());
 
-        PlaylistAdapter playlistAdapter = new PlaylistAdapter(context);
-        playlistAdapter.setPlaylists(topic.getPlaylists());
-        holder.rcvCategory.setAdapter(playlistAdapter);
+        AlbumAdapter albumAdapter = new AlbumAdapter(context);
+        albumAdapter.setAlbums(topic.getAlbums());
+        holder.rcvCategory.setAdapter(albumAdapter);
     }
 
     @Override

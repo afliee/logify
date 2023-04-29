@@ -44,7 +44,16 @@
             android:id="@+id/loader"
             style="?android:attr/progressBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rcvTrendingSongs"
+            android:layout_marginBottom="@dimen/_20dp"
+            android:layout_marginTop="@dimen/_10dp" />
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcvCategory"
             android:layout_width="match_parent"
