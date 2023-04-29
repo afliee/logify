@@ -1,18 +1,23 @@
 package com.example.logify.entities;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Topic {
     private String id;
-    private String name;
+    private String title;
     private ArrayList<Playlist> playlists;
+    private List<Playlist> data;
+
 
     public Topic() {
     }
 
-    public Topic(String id, String name, ArrayList<Playlist> playlists) {
+    public Topic(String id, String title, ArrayList<Playlist> playlists) {
         this.id = id;
-        this.name = name;
+        this.title = title;
         this.playlists = playlists;
     }
 
@@ -24,28 +29,43 @@ public class Topic {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public List<Playlist> getData() {
+        return data;
     }
 
-    public ArrayList<Playlist> getTopics() {
+    public void setData(List<Playlist> data) {
+        this.data = data;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public ArrayList<Playlist> getPlaylists() {
         return playlists;
     }
 
-    public void setTopics(ArrayList<Playlist> playlists) {
+    public void setPlaylists(ArrayList<Playlist> playlists) {
         this.playlists = playlists;
     }
 
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("id", this.id);
+        result.put("title", this.title);
+        result.put("data", this.data);
+        return result;
+    }
     @Override
     public String toString() {
-        return "Category{" +
+        return "Topic{" +
                 "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", topics=" + playlists +
+                ", title='" + title + '\'' +
+                ", playlists=" + playlists +
                 '}';
     }
 }

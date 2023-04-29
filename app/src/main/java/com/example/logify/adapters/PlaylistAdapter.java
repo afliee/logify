@@ -37,7 +37,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.TopicV
         return new TopicViewHolder(view);
     }
 
-    public void setTopics(ArrayList<Playlist> playlists) {
+    public void setPlaylists(ArrayList<Playlist> playlists) {
         this.playlists = playlists;
         notifyDataSetChanged();
     }

@@ -9,9 +9,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
@@ -20,6 +22,7 @@ import com.example.logify.R;
 import com.example.logify.adapters.TopicAdapter;
 import com.example.logify.entities.Topic;
 import com.example.logify.entities.Playlist;
+import com.example.logify.models.TopicModel;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -36,7 +39,7 @@ public class HomeFragment extends Fragment {
     private ImageSlider imageSlider;
     private RecyclerView rcvCategory;
     private Activity activity;
-
+    private ProgressBar loader;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -85,6 +88,8 @@ public class HomeFragment extends Fragment {
 
 //        set up the recycler view for each category
         rcvCategory = convertView.findViewById(R.id.rcvCategory);
+
+        loader = convertView.findViewById(R.id.loader);
         setUpCategory();
 
 
@@ -100,40 +105,15 @@ public class HomeFragment extends Fragment {
         rcvCategory.setLayoutManager(linearLayoutManager);
         rcvCategory.setNestedScrollingEnabled(true);
 
-        /* set the adapter
-         * temporary data
-         */
-        ArrayList<Topic> topics = new ArrayList<>();
-        ArrayList<Playlist> playlists = new ArrayList<>();
-        playlists.add(new Playlist(
-                UUID.randomUUID().toString(),
-                "EDM",
-                "Electronic Dance Music",
-                "https://photo-zmp3.zmdcdn.me/cover/5/d/c/f/5dcf39a2a590e3f43927a55d0c37866b.jpg",
-                LocalTime.now().toString()
-        ));
-
-        playlists.add(new Playlist(
-                UUID.randomUUID().toString(),
-                "Pop",
-                "Pop Music",
-                "https://photo-zmp3.zmdcdn.me/cover/a/5/4/4/a54405ab40d843bc73366684a74203b4.jpg",
-                LocalTime.now().toString()
-        ));
-
-        playlists.add(new Playlist(
-                UUID.randomUUID().toString(),
-                "Rock",
-                "Rock Music",
-                "https://photo-zmp3.zmdcdn.me/cover/d/a/0/3/da037012a912238fb41429ec6db03acf.jpg",
-                LocalTime.now().toString()
-        ));
-
-        topics.add(new Topic(UUID.randomUUID().toString(), "Music 1", playlists));
-        topics.add(new Topic(UUID.randomUUID().toString(), "Music 2", playlists));
-        topics.add(new Topic(UUID.randomUUID().toString(), "Music 3", playlists));
-        topics.add(new Topic(UUID.randomUUID().toString(), "Music 4", playlists));
-        topicAdapter.setTopics(topics);
+        TopicModel topicModel = new TopicModel();
+        topicModel.getTopics(new TopicModel.TopicModelListener() {
+            @Override
+            public void onTopicsChanged(ArrayList<Topic> topics) {
+                Log.e(TAG, "onTopicsChanged: data " + topics.toString());
+                topicAdapter.setTopics(topics);
+                loader.setVisibility(View.GONE);
+            }
+        });
         rcvCategory.setAdapter(topicAdapter);
     }
 

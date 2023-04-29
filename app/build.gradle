@@ -45,11 +45,16 @@ dependencies {
     // Also add the dependency for the Google Play services library and specify its version
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
     implementation 'com.google.firebase:firebase-database'
+
+//    handle image
     implementation 'com.github.denzcoskun:ImageSlideshow:0.1.0'
     implementation 'com.forceai.glide:glide:4.11.0.10'
+
     implementation 'com.makeramen:roundedimageview:2.3.0'
+//    media for notification
     implementation 'androidx.media:media:1.6.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

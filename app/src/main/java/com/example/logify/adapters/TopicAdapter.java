@@ -53,10 +53,10 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false);
         holder.rcvCategory.setLayoutManager(linearLayoutManager);
 
-        holder.tvCategoryName.setText(topic.getName());
+        holder.tvCategoryName.setText(topic.getTitle());
 
         PlaylistAdapter playlistAdapter = new PlaylistAdapter(context);
-        playlistAdapter.setTopics(topic.getTopics());
+        playlistAdapter.setPlaylists(topic.getPlaylists());
         holder.rcvCategory.setAdapter(playlistAdapter);
     }
 
