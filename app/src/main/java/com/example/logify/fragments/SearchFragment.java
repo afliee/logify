@@ -84,7 +84,6 @@ public class SearchFragment extends Fragment {
         View convertView = inflater.inflate(R.layout.fragment_search, container, false);
 
         edtSearch = convertView.findViewById(R.id.edtSearch);
-        Log.d("EDT SEARCH", "onCreateView: " + edtSearch);
         edtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {

@@ -3,19 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cvSearchItem"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_margin="10dp">
+    android:layout_width="150dp"
+    android:layout_height="100dp"
+    android:layout_margin="10dp"
+    android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="150dp"
+        android:layout_height="100dp">
 
         <ImageView
             android:id="@+id/imvSearchItem"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/title_slide"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.015"
@@ -27,17 +29,17 @@
             android:id="@+id/tvSearchItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Playlist by Artist"
-            android:textColor="#fff"
-            android:textSize="18sp"
             android:background="#BC000000"
+            android:text="Playlist by Artist"
             android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="@+id/imvSearchItem"
+            android:maxLines="1"
+            android:textColor="#fff"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/imvSearchItem"
-            app:layout_constraintHorizontal_bias="0.532"
-            app:layout_constraintStart_toStartOf="@+id/imvSearchItem"
-            app:layout_constraintTop_toTopOf="@+id/imvSearchItem"
-            app:layout_constraintVertical_bias="0.503" />
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
