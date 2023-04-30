@@ -14,7 +14,7 @@
             android:id="@+id/edtSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginHorizontal="20dp"
             android:background="@drawable/background_border_grey"
             android:drawableLeft="@drawable/baseline_search_24"
             android:drawablePadding="4dp"

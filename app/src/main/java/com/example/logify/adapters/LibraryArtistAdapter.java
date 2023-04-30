@@ -62,13 +62,15 @@ public class LibraryArtistAdapter extends RecyclerView.Adapter{
     private class LibraryArtistViewHolder extends RecyclerView.ViewHolder {
         private ImageView imvLibraryArtist;
         private TextView tvArtistName;
+        private TextView tvTitle;
         private ConstraintLayout clLibraryArtist;
         public LibraryArtistViewHolder(View itemView) {
             super(itemView);
             imvLibraryArtist = itemView.findViewById(R.id.imvArtist);
             tvArtistName = itemView.findViewById(R.id.tvArtistName);
             clLibraryArtist = itemView.findViewById(R.id.rcvArtist);
-
+            tvTitle = itemView.findViewById(R.id.tvTitle);
+            tvTitle.setText("Artists");
         }
     }
 }
