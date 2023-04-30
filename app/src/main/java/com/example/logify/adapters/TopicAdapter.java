@@ -1,6 +1,7 @@
 package com.example.logify.adapters;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,7 +76,10 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
 //                handle the click event and replace the fragment
                 AppCompatActivity activity = (AppCompatActivity) context;
                 FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("album", album);
                 ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                viewAlbumFragment.setArguments(bundle);
                 fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();

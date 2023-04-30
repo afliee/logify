@@ -61,4 +61,5 @@
     <dimen name="album_image_size">150dp</dimen>
     <dimen name="album_name_size">20sp</dimen>
     <dimen name="album_artist_size">15sp</dimen>
+    <dimen name="artist_contributor_size">16sp</dimen>
 </resources>
