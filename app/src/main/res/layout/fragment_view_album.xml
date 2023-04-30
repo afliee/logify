@@ -38,49 +38,50 @@
 
     <!--    album name -->
     <TextView
+        android:id="@+id/album_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/album_name"
-        android:text="Album title"
-        app:layout_constraintTop_toBottomOf="@+id/album_image"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:gravity="center"
         android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:text="Album title"
+        android:textSize="@dimen/album_name_size"
         android:textStyle="bold"
-        android:textSize="@dimen/album_name_size"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/album_image" />
 
     <!--    album artist -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/album_artist"
-        android:text="Album artist"
-        app:layout_constraintTop_toBottomOf="@+id/album_name"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:gravity="center"
-        android:layout_marginTop="5dp"
-        android:textSize="@dimen/album_artist_size"/>
-
-<!--    action -->
-    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="Album artist"
+        android:textSize="@dimen/album_artist_size"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/album_name" />
+
+    <!--    action -->
+    <LinearLayout
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="@dimen/_10dp"
-        app:layout_constraintTop_toBottomOf="@+id/album_artist"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:gravity="center_vertical"
-        android:layout_marginTop="15dp">
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/album_artist">
 
         <LinearLayout
             android:layout_width="@dimen/_0dp"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
+            android:layout_weight="1"
             android:gravity="center_vertical"
-            android:layout_weight="1" >
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/add_album"
@@ -88,10 +89,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:background="@null"
+                android:contentDescription="TODO"
                 android:minWidth="48dp"
                 android:minHeight="48dp"
-                android:src="@drawable/baseline_favorite_border_24"
-                android:contentDescription="TODO" />
+                android:src="@drawable/baseline_favorite_border_24" />
 
             <ImageButton
                 android:id="@+id/download_album"
@@ -118,10 +119,9 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
             android:layout_weight="0"
             android:gravity="center_vertical"
-            >
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/shuffle_album"
@@ -138,12 +138,20 @@
                 android:id="@+id/play_album"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/baseline_play_arrow_24"
-                android:background="@drawable/rouned_button_play"
                 android:layout_marginLeft="10dp"
-                android:contentDescription="TODO" />
+                android:background="@drawable/rouned_button_play"
+                android:contentDescription="TODO"
+                android:src="@drawable/baseline_play_arrow_24" />
         </LinearLayout>
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/album_songs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/actions" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
