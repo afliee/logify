@@ -20,6 +20,10 @@ import java.util.ArrayList;
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>{
     private Context context;
     private ArrayList<Album> albums;
+    public interface  OnItemClickListener{
+        void onItemClick(Album album, int position);
+    }
+    public OnItemClickListener onItemClickListener;
 
     public AlbumAdapter(Context context) {
         this.context = context;
@@ -42,6 +46,9 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
         notifyDataSetChanged();
     }
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
+    }
     @Override
     public void onBindViewHolder(@NonNull AlbumViewHolder holder, int position) {
         Album album = albums.get(position);
@@ -57,16 +64,26 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
         return albums == null ? 0 : albums.size();
     }
 
-    public class AlbumViewHolder extends RecyclerView.ViewHolder {
+    public class AlbumViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imgTopic;
         private TextView tvTopicName;
         private CardView cvTopicItem;
+        private View view;
 
         public AlbumViewHolder(@NonNull View itemView) {
             super(itemView);
+            view = itemView;
             imgTopic = itemView.findViewById(R.id.imgTopic);
             tvTopicName = itemView.findViewById(R.id.tvTopicName);
             cvTopicItem = itemView.findViewById(R.id.cvTopicItem);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Album album = albums.get(position);
+            onItemClickListener.onItemClick(album, position);
         }
     }
 }
