@@ -39,7 +39,7 @@ import com.example.logify.constants.App;
 import com.example.logify.entities.Song;
 import com.example.logify.fragments.AboutUsFragment;
 import com.example.logify.fragments.HomeFragment;
-import com.example.logify.fragments.PlaylistFragment;
+import com.example.logify.fragments.LibraryFragment;
 import com.example.logify.fragments.ProfileFragment;
 import com.example.logify.fragments.SearchFragment;
 import com.example.logify.fragments.SettingFragment;
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //                        Toast.makeText(MainActivity.this, "Search", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.bottom_playlist:
-                        replaceFragment(new PlaylistFragment());
+                        replaceFragment(new LibraryFragment());
 //                        Toast.makeText(MainActivity.this, "About", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.bottom_profile:

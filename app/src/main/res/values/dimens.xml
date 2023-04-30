@@ -58,4 +58,7 @@
     <dimen name="current_song_size">54dp</dimen>
     <dimen name="_150dp">150dp</dimen>
     <dimen name="_180dp">180dp</dimen>
+    <dimen name="album_image_size">150dp</dimen>
+    <dimen name="album_name_size">20sp</dimen>
+    <dimen name="album_artist_size">15sp</dimen>
 </resources>
