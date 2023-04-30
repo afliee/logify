@@ -37,6 +37,7 @@ public class AlbumModel extends Model {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Album album = new Album();
+                ArrayList<String> artistContributor = new ArrayList<>();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     if (dataSnapshot.getKey().equals(id)) {
 
@@ -75,7 +76,9 @@ public class AlbumModel extends Model {
 
                                 for (int j = 0; j < artistsIdArray.length(); j++) {
                                     JSONObject artistId = artistsIdArray.optJSONObject(j);
-                                    artistIds.add(artistId.optString("id"));
+                                    String artistIdStr = artistId.optString("id");
+                                    artistIds.add(artistIdStr);
+                                    artistContributor.add(artistIdStr);
                                 }
 
                                 ArrayList<String> genres = new ArrayList<>();
@@ -91,6 +94,7 @@ public class AlbumModel extends Model {
                         }
                         if (songs.size() > 0) {
                             album.setSongs(songs);
+                            album.setArtistIds(artistContributor);
                             listener.onAlbumFound(album);
                         }
                         return;

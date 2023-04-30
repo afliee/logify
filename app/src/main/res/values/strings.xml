@@ -63,5 +63,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="trend_songs">Trend Songs</string>
     <string name="see_all">See all</string>
+    <string name="artist_contributor">Artists Contribution</string>
+    <string name="genres_album">Genre Albums</string>
 
 </resources>
