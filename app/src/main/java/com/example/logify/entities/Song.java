@@ -1,16 +1,22 @@
 package com.example.logify.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Song implements Serializable {
     private String id;
     private String name;
     private String artistId;
+    private ArrayList<String> artistsId;
     private String imageResource;
     private String resource;
     private String releaseDate;
+    private String artistName;
+    private int duration;
+    private ArrayList<String> genres;
 
-
+    public Song() {
+    }
     public Song(String id, String name, String artistId, String imageResource, String resource, String releaseDate) {
         this.id = id;
         this.name = name;
@@ -18,6 +24,18 @@ public class Song implements Serializable {
         this.imageResource = imageResource;
         this.resource = resource;
         this.releaseDate = releaseDate;
+    }
+
+    public Song(String id, String name, ArrayList<String> artistsId, String imageResource, String resource, String releaseDate, String artistName, int duration, ArrayList<String> genres) {
+        this.id = id;
+        this.name = name;
+        this.artistsId = artistsId;
+        this.imageResource = imageResource;
+        this.resource = resource;
+        this.releaseDate = releaseDate;
+        this.artistName = artistName;
+        this.duration = duration;
+        this.genres = genres;
     }
 
     public String getId() {

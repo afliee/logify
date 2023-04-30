@@ -1,11 +1,17 @@
 package com.example.logify.entities;
 
+import java.util.ArrayList;
+
 public class Album {
     private String id;
     private String name;
     private String description;
     private String image;
     private String createdDate;
+    private ArrayList<Artist> artists;
+    private ArrayList<Song> songs;
+
+
 
     /**
      * This is a constructor method to create a new instance of Topic class.
@@ -14,16 +20,36 @@ public class Album {
      * @param description
      * @param image
      * @param createdDate
+     * @param artists
+     * @param songs
      */
-    public Album(String id, String name, String description, String image, String createdDate) {
+    public Album(String id, String name, String description, String image, String createdDate, ArrayList<Artist> artists, ArrayList<Song> songs) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.image = image;
         this.createdDate = createdDate;
+        this.artists = artists;
+        this.songs = songs;
     }
 
     public Album() {
+    }
+
+    public ArrayList<Artist> getArtists() {
+        return artists;
+    }
+
+    public void setArtists(ArrayList<Artist> artists) {
+        this.artists = artists;
+    }
+
+    public ArrayList<Song> getSongs() {
+        return songs;
+    }
+
+    public void setSongs(ArrayList<Song> songs) {
+        this.songs = songs;
     }
 
     public String getId() {
@@ -67,15 +93,16 @@ public class Album {
     }
 
 
-
     @Override
     public String toString() {
-        return "Topic{" +
+        return "Album{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", image='" + image + '\'' +
                 ", createdDate='" + createdDate + '\'' +
+                ", artists=" + artists +
+                ", songs=" + songs +
                 '}';
     }
 }

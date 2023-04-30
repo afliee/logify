@@ -20,7 +20,9 @@ import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.logify.R;
 import com.example.logify.adapters.TopicAdapter;
+import com.example.logify.entities.Album;
 import com.example.logify.entities.Topic;
+import com.example.logify.models.AlbumModel;
 import com.example.logify.models.TopicModel;
 
 import java.util.ArrayList;
@@ -115,6 +117,18 @@ public class HomeFragment extends Fragment {
             }
         });
         rcvCategory.setAdapter(topicAdapter);
+        AlbumModel albumModel = new AlbumModel();
+        albumModel.find("606I6AEC", new AlbumModel.FindAlbumListener() {
+            @Override
+            public void onAlbumFound(Album album) {
+                Log.e(TAG, "onAlbumFound: " + album.toString());
+            }
+
+            @Override
+            public void onAlbumNotExist() {
+                Log.e(TAG, "onAlbumNotExist: album not found");
+            }
+        });
     }
 
 
