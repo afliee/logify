@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/_180dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="@dimen/_10dp"
+    android:id="@+id/cvArtistContributionsItem"
+    android:layout_marginBottom="@dimen/_10dp"
+    android:layout_marginEnd="@dimen/_10dp"
+    app:cardElevation="@dimen/_0dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    android:background="@color/transparent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/_10dp">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/image_artist"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_150dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/album_placeholder"
+            app:riv_corner_radius="500dp" />
+
+        <TextView
+            android:layout_marginTop="@dimen/_10dp"
+            android:id="@+id/artist_contributor_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Artist Name"
+            android:gravity="center"
+            android:maxLines="1"
+            android:layout_weight="1"
+            android:textSize="@dimen/_16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

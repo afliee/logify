@@ -62,4 +62,8 @@
     <dimen name="album_name_size">20sp</dimen>
     <dimen name="album_artist_size">15sp</dimen>
     <dimen name="artist_contributor_size">16sp</dimen>
+    <dimen name="album_sort_description_size">13sp</dimen>
+    <dimen name="list_item_spacing">16dp</dimen>
+    <dimen name="list_item_spacing_half">8dp</dimen>
+    <dimen name="artist_contribution_header_text_size">20sp</dimen>
 </resources>

@@ -22,6 +22,11 @@ public class ArtistModel extends Model{
         void onCompleted(ArrayList<Artist> artists);
     }
 
+    public interface OnAtistFindListener {
+        void onArtistFound(Artist artist);
+        void onAtistNotExist();
+    }
+
     public ArtistModel() {
         super();
     }
@@ -54,5 +59,30 @@ public class ArtistModel extends Model{
                 Log.e(TAG, "onCancelled: artist not exist in db");
             }
         });
+    }
+
+    public Artist getArtistById(String id) {
+        Artist artist = new Artist();
+        database.child(Schema.ARTISTS).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                JSONObject jsonObject = new JSONObject((java.util.Map) snapshot.getValue());
+                String id = snapshot.getKey();
+                String name = jsonObject.optString("name");
+                String thumbnail = jsonObject.optString("thumbnail");
+                String playlistId = jsonObject.optString("playlistId");
+
+                artist.setId(id);
+                artist.setName(name);
+                artist.setImage(thumbnail);
+                artist.setPlaylistId(playlistId);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: artist not exist in db");
+            }
+        });
+        return artist;
     }
 }

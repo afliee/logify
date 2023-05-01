@@ -1,14 +1,40 @@
 package com.example.logify.fragments;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.logify.R;
+import com.example.logify.adapters.ArtistContributionAdapter;
+import com.example.logify.adapters.SongAdapter;
+import com.example.logify.constants.App;
+import com.example.logify.entities.Album;
+import com.example.logify.entities.Artist;
+import com.example.logify.entities.Song;
+import com.example.logify.models.AlbumModel;
+import com.example.logify.models.ArtistModel;
+import com.example.logify.services.SongService;
+import com.example.logify.utils.BlurTransformation;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,15 +42,27 @@ import com.example.logify.R;
  * create an instance of this fragment.
  */
 public class ViewAlbumFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "ViewAlbumFragment";
+//    params
+    private static final String ALBUM_ARG = "album";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private AlbumModel albumModel = new AlbumModel();
+    private ArtistModel artistModel = new ArtistModel();
+    private Album album;
+    private int songIndex;
+    private ArtistContributionAdapter artistContributionAdapter;
+    private SongAdapter songAdapter;
+    private Song currentSong;
+    private ImageView blurImageBackground, imgAlbumCover;
+    private RecyclerView rcvAlbumSongs, rcvAlbumArtists, rcvAlbumGenres;
+    private TextView tvAlbumTitle, tvAlbumArtist, tvSortDescription, tvArtistContributionTitle, tvSeeAllArtists;
+    private ImageButton btnAddToPlaylist, btnDownloadAlbum, btnShareAlbum, btnShuffleAlbum, btnPlayAlbum;
+    private LinearLayout llArtistContributorsTitle;
+    private Context context = getContext();
+    private Activity activity;
 
     public ViewAlbumFragment() {
         // Required empty public constructor
@@ -42,8 +80,6 @@ public class ViewAlbumFragment extends Fragment {
     public static ViewAlbumFragment newInstance(String param1, String param2) {
         ViewAlbumFragment fragment = new ViewAlbumFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,15 +88,160 @@ public class ViewAlbumFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            album = (Album) getArguments().getSerializable(ALBUM_ARG);
+            Log.e(TAG, "onCreate: " + album.toString() );
         }
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        activity = getActivity();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        activity = null;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        album = (Album) getArguments().getSerializable(ALBUM_ARG);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_view_album, container, false);
+        View albumView = inflater.inflate(R.layout.fragment_view_album, container, false);
+        blurImageBackground = albumView.findViewById(R.id.blur_image);
+        imgAlbumCover = albumView.findViewById(R.id.album_image);
+
+        tvAlbumTitle = albumView.findViewById(R.id.album_name);
+        tvAlbumArtist = albumView.findViewById(R.id.album_artist);
+        tvSortDescription = albumView.findViewById(R.id.sort_description);
+        tvArtistContributionTitle = albumView.findViewById(R.id.artist_contributor_title);
+        tvSeeAllArtists = albumView.findViewById(R.id.see_all);
+
+        btnAddToPlaylist = albumView.findViewById(R.id.add_to_playlist);
+        btnDownloadAlbum = albumView.findViewById(R.id.download_album);
+        btnShareAlbum = albumView.findViewById(R.id.share_album);
+        btnShuffleAlbum = albumView.findViewById(R.id.shuffle_album);
+        btnPlayAlbum = albumView.findViewById(R.id.play_album);
+
+        rcvAlbumSongs = albumView.findViewById(R.id.album_songs);
+        rcvAlbumArtists = albumView.findViewById(R.id.artist_contributor_list);
+        rcvAlbumGenres = albumView.findViewById(R.id.genres_album_list);
+
+        llArtistContributorsTitle = albumView.findViewById(R.id.artist_contributor_title_layout);
+
+        initUI();
+        initLayoutUI();
+        handleSongClick();
+        return albumView;
+    }
+
+    private void handleSongClick() {
+        songAdapter.setOnItemClickListener(new SongAdapter.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(Song song, int position) {
+                Log.e(TAG, "onItemClick: " + song.toString() );
+                sendActionToService(SongService.ACTION_PLAY, position);
+            }
+        });
+    }
+
+    private void initLayoutUI() {
+        ArrayList<Song> songs = album.getSongs();
+        ArrayList<String> artists = album.getArtistIds();
+        ArrayList<Artist>  artistArrayList = new ArrayList<>();
+        ArrayList<String> artistNames = new ArrayList<>();
+        for (String artistId: artists) {
+            Artist artist = artistModel.getArtistById(artistId);
+            if (artist != null) {
+                artistArrayList.add(artist);
+                artistNames.add(artist.getName());
+            }
+        }
+
+        songAdapter.setSongs(songs);
+        artistContributionAdapter.setArtists(artistArrayList);
+
+//        blur album layout with glide
+
+        if (activity != null) {
+            Glide.with(activity)
+                    .load(album.getImage())
+                    .apply(RequestOptions.bitmapTransform(new BlurTransformation(context, 25, 1)))
+                    .into(blurImageBackground);
+
+            Glide.with(activity)
+                    .load(album.getImage())
+                    .into(imgAlbumCover);
+
+            tvAlbumTitle.setText(album.getName());
+            tvSortDescription.setText(album.getDescription());
+            tvAlbumArtist.setText("Logify are ur friends");
+        }
+        handleActionButtons();
+        handleShowAllArtists(artistArrayList);
+    }
+
+    private void handleActionButtons() {
+        btnPlayAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<Song> songs = album.getSongs();
+                Intent intent = new Intent(getContext(), SongService.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(App.SONGS_ARG, songs);
+                intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PLAY_ALBUM);
+                intent.putExtra(App.SONG_INDEX, 0);
+                intent.putExtras(bundle);
+                getContext().startService(intent);
+            }
+        });
+    }
+
+    private void handleShowAllArtists(ArrayList<Artist> artistArrayList) {
+        llArtistContributorsTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArtistContributionBottomSheetFragment artistContributionBottomSheetFragment = new ArtistContributionBottomSheetFragment();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(App.ARTIST_ARG, artistArrayList);
+                artistContributionBottomSheetFragment.setArguments(bundle);
+                artistContributionBottomSheetFragment.show(getFragmentManager(), "artist_contribution_bottom_sheet");
+                artistContributionBottomSheetFragment.setCancelable(true);
+            }
+        });
+    }
+
+    private void initUI() {
+        RecyclerView.LayoutManager songLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager artistLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView.LayoutManager genreLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+
+        rcvAlbumSongs.setLayoutManager(songLayoutManager);
+        rcvAlbumArtists.setLayoutManager(artistLayoutManager);
+        rcvAlbumGenres.setLayoutManager(genreLayoutManager);
+
+        songAdapter = new SongAdapter(getContext());
+        artistContributionAdapter = new ArtistContributionAdapter(getContext());
+
+        rcvAlbumSongs.setAdapter(songAdapter);
+        rcvAlbumArtists.setAdapter(artistContributionAdapter);
+    }
+
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    private void sendActionToService(int actionType, int position) {
+        Intent intent = new Intent(getContext(), SongService.class);
+        intent.putExtra(App.ACTION_TYPE, actionType);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(App.SONGS_ARG, album.getSongs());
+        intent.putExtra(App.SONG_INDEX, position);
+        intent.putExtras(bundle);
+        getContext().startService(intent);
     }
 }

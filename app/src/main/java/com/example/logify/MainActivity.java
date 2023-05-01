@@ -1,7 +1,6 @@
 package com.example.logify;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -16,20 +15,16 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,30 +46,34 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.time.LocalTime;
-import java.util.Date;
-import java.util.UUID;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_CODE = 1;
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
-    private ImageView btnPlayPause;
+    private ImageView btnPlayPause, btnNext;
     private FirebaseAuth mAuth;
     private CardView bottomCurrentSong;
     private ShapeableImageView albumArt;
     private TextView songTitle, songArtist;
     private Song currentSong;
+    private ArrayList<Song> songs;
     private boolean isPlaying = false;
+    private int songIndex;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             if (bundle == null) return;
-            if (bundle.containsKey("song")) {
+            if (bundle.containsKey(App.CURRENT_SONG)) {
                 currentSong = (Song) bundle.getSerializable(App.CURRENT_SONG);
+                songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
+                songIndex = bundle.getInt(App.SONG_INDEX);
                 isPlaying = bundle.getBoolean(App.IS_PLAYING);
+
                 int action = bundle.getInt(App.ACTION_TYPE);
                 handleLayoutCurrentSong(action);
             }
@@ -97,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 //        bottom current song
         btnPlayPause = findViewById(R.id.play_pause);
+        btnNext = findViewById(R.id.next);
+
         bottomCurrentSong = findViewById(R.id.bottom_current_song);
         albumArt = findViewById(R.id.album_art);
         songTitle = findViewById(R.id.song_title);
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             titleApp = "Good Evening";
         }
+        bottomCurrentSong.setVisibility(View.GONE);
         getSupportActionBar().setTitle(titleApp);
 
 
@@ -189,27 +191,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Play/Pause", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Play/Pause", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, SongService.class);
-//                temporary data
-                Song song = new Song(
-                        UUID.randomUUID().toString(),
-                        "Thang Tu La Loi Noi Doi Cua Em",
-                        "1",
-                        "https://photo-zmp3.zmdcdn.me/cover/5/d/c/f/5dcf39a2a590e3f43927a55d0c37866b.jpg",
-                        "https://mp3-s1-zmp3.zmdcdn.me/9675b5b4f6f41faa46e5/622388426318721872?authen=exp=1682967754~acl=/9675b5b4f6f41faa46e5/*~hmac=74694940fa54ec6fd276490a2df84852&fs=MTY4MjmUsIC5NDk1NDAxM3x3ZWJWNnwwfDE3MS4yNDgdUngMjI1LjM",
-                        LocalTime.now().toString()
-                );
-
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("song", song);
-                intent.putExtras(bundle);
                 if (isPlaying) {
-                    intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PAUSE);
+                    sendBroadcastToService(SongService.ACTION_PAUSE);
                 } else {
-                    intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PLAY);
+                    sendBroadcastToService(SongService.ACTION_RESUME);
                 }
-                startService(intent);
+            }
+        });
+
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "onClick: btn next clicked");
+                sendBroadcastToService(SongService.ACTION_NEXT);
             }
         });
     }
@@ -229,6 +225,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 updateStatusUI();
                 break;
             }
+            case SongService.ACTION_NEXT:
+            case SongService.ACTION_PREVIOUS: {
+                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom with action " + action);
+                updateCurrentSongUI();
+                break;
+            }
             case SongService.ACTION_CLOSE: {
                 Log.e(TAG, "handleLayoutCurrentSong: hide current song bottom");
                 bottomCurrentSong.setVisibility(View.GONE);
@@ -242,8 +244,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (currentSong != null) {
             bottomCurrentSong.setVisibility(View.VISIBLE);
             songTitle.setText(currentSong.getName());
-            songArtist.setText(currentSong.getArtistId());
+            songArtist.setText(currentSong.getArtistName());
             Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
+        } else {
+            bottomCurrentSong.setVisibility(View.GONE);
         }
     }
 
@@ -258,6 +262,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void sendBroadcastToService(int action) {
         Intent intent = new Intent(this, SongService.class);
         intent.putExtra(App.ACTION_TYPE, action);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(App.SONGS_ARG, songs);
+        bundle.putSerializable(App.CURRENT_SONG, currentSong);
+        bundle.putInt(App.SONG_INDEX, songIndex);
+        intent.putExtras(bundle);
         startService(intent);
     }
     @Override

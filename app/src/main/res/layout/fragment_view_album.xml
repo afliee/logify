@@ -1,224 +1,267 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:orientation="vertical"
+    android:scrollbars="none"
     tools:context=".fragments.ViewAlbumFragment">
 
-    <!--    blur image background -->
-
-    <!--    album image -->
-
-    <ImageView
-        android:id="@+id/blur_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.3"
-        android:background="@drawable/blue_image_background"
-        android:scaleType="centerCrop"
-        android:src="@drawable/image_song"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <ImageView
-        android:id="@+id/album_image"
-        android:layout_width="@dimen/album_image_size"
-        android:layout_height="@dimen/album_image_size"
-        android:layout_marginTop="24dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/image_song"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/blur_image" />
-
-    <!--    album name -->
-    <TextView
-        android:id="@+id/album_name"
+<!--    image blur background-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/album_layout"
+        android:paddingBottom="@dimen/_40dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:gravity="center"
-        android:text="Album title"
-        android:textSize="@dimen/album_name_size"
-        android:textStyle="bold"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/album_image" />
+        app:layout_constraintBottom_toBottomOf="@+id/sort_description"
+        app:layout_constraintTop_toBottomOf="@+id/sort_description">
+        <!--    blur image background -->
+        <!--    album image -->
 
-    <!--    album artist -->
-    <TextView
-        android:id="@+id/album_artist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
-        android:text="Album artist"
-        android:textSize="@dimen/album_artist_size"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/album_name" />
-
-    <!--    action -->
-    <LinearLayout
-        android:id="@+id/actions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/_10dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/album_artist">
-
-        <LinearLayout
-            android:layout_width="@dimen/_0dp"
+        <ImageView
+            android:id="@+id/blur_image"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:alpha="0.3"
+            android:background="@drawable/blue_image_background"
+            android:foreground="@drawable/gradient_image_background"
+            android:scaleType="centerCrop"
+            android:src="@drawable/image_song"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <ImageView
+            android:id="@+id/album_image"
+            android:layout_width="@dimen/album_image_size"
+            android:layout_height="@dimen/album_image_size"
+            android:layout_marginTop="24dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/image_song"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/blur_image" />
+
+        <!--    album name -->
+        <TextView
+            android:id="@+id/album_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            android:text="Album title"
+            android:textSize="@dimen/album_name_size"
+            android:textStyle="bold"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/album_image" />
+
+        <!--    album artist -->
+        <TextView
+            android:id="@+id/album_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:text="Album artist"
+            android:textColor="@color/blue_primary_light"
+            android:textSize="@dimen/album_artist_size"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/album_name" />
+
+        <!--    action -->
+        <LinearLayout
+            android:id="@+id/actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/_10dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/album_artist">
 
-            <ImageButton
-                android:id="@+id/add_album"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:background="@null"
-                android:contentDescription="TODO"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                android:src="@drawable/baseline_favorite_border_24" />
+            <LinearLayout
+                android:layout_width="@dimen/_0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/download_album"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:background="@null"
-                android:contentDescription="TODO"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                android:src="@drawable/round_downloading_black_24" />
+                <ImageButton
+                    android:id="@+id/add_to_playlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:background="@null"
+                    android:contentDescription="TODO"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/baseline_favorite_border_24" />
 
-            <ImageButton
-                android:id="@+id/share_album"
+                <ImageButton
+                    android:id="@+id/download_album"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:background="@null"
+                    android:contentDescription="TODO"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/round_downloading_black_24" />
+
+                <ImageButton
+                    android:id="@+id/share_album"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:contentDescription="TODO"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/baseline_share_black_24" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:contentDescription="TODO"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                android:src="@drawable/baseline_share_black_24" />
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/shuffle_album"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/_10dp"
+                    android:background="@null"
+                    android:contentDescription="TODO"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/shuffle" />
+
+                <ImageButton
+                    android:id="@+id/play_album"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/rounded_button_play"
+                    android:contentDescription="TODO"
+                    android:src="@drawable/baseline_play_arrow_24" />
+            </LinearLayout>
         </LinearLayout>
 
+        <!--    sort description-->
+        <TextView
+            android:id="@+id/sort_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:paddingBottom="@dimen/_10dp"
+            android:text="sort desription"
+            android:padding="@dimen/_8dp"
+            android:maxLines="2"
+            android:textSize="@dimen/album_sort_description_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/actions" />
+
+        <!--    songs list-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/album_songs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/sort_description" />
+
+        <!--    artist contributor-->
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:id="@+id/artist_contributor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/album_songs">
 
-            <ImageButton
-                android:id="@+id/shuffle_album"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/_10dp"
-                android:background="@null"
-                android:contentDescription="TODO"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                android:src="@drawable/shuffle" />
+                android:paddingHorizontal="@dimen/_8dp"
+                android:id="@+id/artist_contributor_title_layout"
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/play_album"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/artist_contributor_title"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/_10dp"
+                    android:text="@string/artist_contributor"
+                    android:textSize="@dimen/artist_contributor_size"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/see_all"
+                    android:minWidth="@dimen/_48dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="See all"
+                    android:layout_marginBottom="@dimen/_8dp"
+                    android:textStyle="italic"
+                    android:textSize="12sp"
+                    />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/artist_contributor_list"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:background="@drawable/rouned_button_play"
-                android:contentDescription="TODO"
-                android:src="@drawable/baseline_play_arrow_24" />
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+
+
         </LinearLayout>
-    </LinearLayout>
 
-    <!--    sort description-->
-    <TextView
-        android:id="@+id/sort_description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:gravity="center"
-        android:text="sort desription"
-        android:textSize="@dimen/album_artist_size"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/actions" />
-
-    <!--    songs list-->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/album_songs"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sort_description" />
-
-    <!--    artist contributor-->
-    <LinearLayout
-        android:id="@+id/artist_contributor"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/album_songs">
-
-        <TextView
-            android:layout_width="match_parent"
+        <!--    genres playlist-->
+        <LinearLayout
+            android:id="@+id/genres_album"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/artist_contributor"
-            android:textSize="@dimen/artist_contributor_size"
-            android:paddingHorizontal="@dimen/_10dp"
-            android:textStyle="bold"/>
+            android:layout_marginTop="15dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/artist_contributor">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:orientation="horizontal"
-            android:id="@+id/artist_contributor_list"/>
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/_10dp"
+                android:text="@string/genres_album"
+                android:textSize="@dimen/artist_contributor_size"
+                android:textStyle="bold" />
 
-<!--    genres playlist-->
-    <LinearLayout
-        android:id="@+id/genres_album"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/artist_contributor">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/genres_album_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/genres_album"
-            android:textSize="@dimen/artist_contributor_size"
-            android:paddingHorizontal="@dimen/_10dp"
-            android:textStyle="bold"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:orientation="horizontal"
-            android:id="@+id/genres_album_list"/>
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

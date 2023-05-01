@@ -18,6 +18,7 @@ import com.example.logify.R;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Topic;
 import com.example.logify.fragments.ViewAlbumFragment;
+import com.example.logify.models.AlbumModel;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
     private Context context;
     private ArrayList<Topic> topics;
     private AlbumAdapter albumAdapter;
+    private AlbumModel albumModel = new AlbumModel();
 
     public TopicAdapter(Context context, ArrayList<Topic> topics) {
         this.context = context;
@@ -72,17 +74,28 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
         albumAdapter.setOnItemClickListener(new AlbumAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Album album, int position) {
-                Log.e(TAG, "onItemClick: " + position + album.toString());
+                String albumId = album.getId();
+                albumModel.find(albumId, new AlbumModel.FindAlbumListener() {
+                    @Override
+                    public void onAlbumFound(Album album) {
+                        Log.e(TAG, "onItemClick: " + position + album.toString());
 //                handle the click event and replace the fragment
-                AppCompatActivity activity = (AppCompatActivity) context;
-                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("album", album);
-                ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
-                viewAlbumFragment.setArguments(bundle);
-                fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                        AppCompatActivity activity = (AppCompatActivity) context;
+                        FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("album", album);
+                        ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                        viewAlbumFragment.setArguments(bundle);
+                        fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
+                    }
+
+                    @Override
+                    public void onAlbumNotExist() {
+                        Log.e(TAG, "onItemClick: album not exist");
+                    }
+                });
             }
         });
         holder.rcvCategory.setAdapter(albumAdapter);

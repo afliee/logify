@@ -40,6 +40,7 @@ import com.example.logify.entities.Song;
 import com.example.logify.receivers.SongReceiver;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 public class SongService extends Service {
     private static final String TAG = "SongService";
@@ -52,8 +53,11 @@ public class SongService extends Service {
     public static final int ACTION_NEXT = 5;
     public static final int ACTION_PREVIOUS = 6;
     public static final int ACTION_CLOSE = 7;
+    public static final int ACTION_PLAY_ALBUM = 8;
 
     private Song song;
+    private ArrayList<Song> songs;
+    private int songIndex;
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false;
 
@@ -80,13 +84,23 @@ public class SongService extends Service {
         if (bundle != null) {
             song = (Song) bundle.getSerializable("song");
             if (song != null) {
-                play();
-                sendNotification();
+//                play();
+//                sendNotification();
+            }
+
+            songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
+            if (songs != null) {
+                songIndex = bundle.getInt("songIndex");
+                song = songs.get(songIndex);
+                Log.e(TAG, "onStartCommand: hadnle " + songIndex + " " + song.toString());
+//                play();
+//                sendNotification();
             }
         }
 
         int action = intent.getIntExtra("action", 0);
         if (action != 0) {
+            Log.e(TAG, "onStartCommand: handle action: " + action);
             handleAction(action);
         }
         return START_NOT_STICKY;
@@ -109,11 +123,16 @@ public class SongService extends Service {
 //        play song
         try {
             mediaPlayer.reset();
-            mediaPlayer.setDataSource(this, Uri.parse(song.getResource()));
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            isPlaying = true;
-            sendBroadcastToActivity(ACTION_START);
+            if (!song.getResource().isEmpty()) {
+                mediaPlayer.setDataSource(this, Uri.parse(song.getResource()));
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                isPlaying = true;
+                sendNotification();
+                sendBroadcastToActivity(ACTION_START);
+            } else {
+                Toast.makeText(this, "Resource song not found", Toast.LENGTH_SHORT).show();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -124,28 +143,29 @@ public class SongService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         Bitmap picture;
-        picture = BitmapFactory.decodeResource(getResources(), R.drawable.image_song_rounded);
-//        try {
-//            URL picture_url = new URL(song.getImageResource());
-//            picture = BitmapFactory.decodeStream(picture_url.openConnection().getInputStream());
-////            notification.setStyle(new Notification.BigPictureStyle().bigPicture(picture));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            picture = BitmapFactory.decodeResource(getResources(), R.drawable.music_empty);
-//        }
+//        picture = BitmapFactory.decodeResource(getResources(), R.drawable.image_song_rounded);
+        try {
+            URL picture_url = new URL(song.getImageResource());
+            picture = BitmapFactory.decodeStream(picture_url.openConnection().getInputStream());
+//            notification.setStyle(new Notification.BigPictureStyle().bigPicture(picture));
+        } catch (Exception e) {
+            e.printStackTrace();
+            picture = BitmapFactory.decodeResource(getResources(), R.drawable.music_empty);
+        }
 //        setting media setting notification
-//        MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(this, TAG);
-//        mediaSessionCompat.setActive(true);
-//        mediaSessionCompat.setMetadata(MediaMetadataCompat.fromMediaMetadata(new MediaMetadata.Builder()
-//                .putLong(MediaMetadata.METADATA_KEY_DURATION, 400)
-//                .putString(MediaMetadata.METADATA_KEY_ARTIST, song.getArtistId())
-//                .putString(MediaMetadata.METADATA_KEY_TITLE, song.getName())
-//                .build()));
-//
-//        mediaSessionCompat.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL);
-//        mediaSessionCompat.setFlags(0);
+        MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(this, TAG);
+        mediaSessionCompat.setActive(true);
+        mediaSessionCompat.setMetadata(MediaMetadataCompat.fromMediaMetadata(new MediaMetadata.Builder()
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, 400)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, song.getArtistName())
+                .putString(MediaMetadata.METADATA_KEY_TITLE, song.getName())
+                .build()));
+
+        mediaSessionCompat.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL);
+        mediaSessionCompat.setFlags(0);
 //        mediaSessionCompat.setPlaybackState(new PlaybackStateCompat.Builder()
 //                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+//                .setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
 //                .build());
 
 //        androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
@@ -156,10 +176,11 @@ public class SongService extends Service {
                 .setLargeIcon(picture)
                 .setSubText("Logify")
                 .setContentIntent(pendingIntent)
-                .setContentText("Test 1")
-                .setContentTitle("artist name")
+                .setContentText(song.getName())
+                .setContentTitle(song.getArtistName())
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(0, 1, 2)
+                        .setMediaSession(mediaSessionCompat.getSessionToken())
                 );
 
         if (isPlaying) {
@@ -183,7 +204,12 @@ public class SongService extends Service {
 //    get pending intent to send broadcast to service
     private PendingIntent getPendingIntent(Context context, int action) {
         Intent intent = new Intent(this, SongReceiver.class);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(App.SONGS_ARG, songs);
+        bundle.putInt(App.SONG_INDEX, songIndex);
         intent.putExtra("action", action);
+        bundle.putSerializable(App.CURRENT_SONG, song);
+        intent.putExtras(bundle);
         PendingIntent pendingIntent;
 
         return PendingIntent.getBroadcast(
@@ -195,12 +221,13 @@ public class SongService extends Service {
     }
 
     private void handleAction(int action) {
+        Log.e(TAG, "handleAction: receive action: " + action);
         switch (action) {
             case ACTION_RESUME:
                 resume();
-                sendNotification();
                 break;
             case ACTION_PLAY:
+            case ACTION_PLAY_ALBUM:
                 play();
                 break;
             case ACTION_PAUSE:
@@ -221,21 +248,40 @@ public class SongService extends Service {
     }
 
     private void resume() {
-        if (mediaPlayer != null && !isPlaying) {
+        if (mediaPlayer != null) {
+            Log.e(TAG, "resume: handle resume " + song.toString());
+            int lenght = mediaPlayer.getCurrentPosition();
+            mediaPlayer.seekTo(lenght);
             mediaPlayer.start();
             isPlaying = true;
-            sendNotification();
             sendBroadcastToActivity(ACTION_RESUME);
+        } else {
+            Log.e(TAG, "resume: with conditions : " + mediaPlayer + " " + isPlaying);
         }
     }
 
     private void previous() {
         Toast.makeText(this, "Previous button clicked", Toast.LENGTH_SHORT).show();
+        if (songIndex > 0) {
+            songIndex--;
+        } else {
+            songIndex = songs.size() - 1;
+        }
+        song = songs.get(songIndex);
+        play();
         sendBroadcastToActivity(ACTION_PREVIOUS);
     }
 
     private void next() {
         Toast.makeText(this, "Next button clicked", Toast.LENGTH_SHORT).show();
+        if (songIndex < songs.size() - 1) {
+            songIndex++;
+        } else {
+            songIndex = 0;
+        }
+        song = songs.get(songIndex);
+        Log.e(TAG, "next: handle next method: " + songIndex + " " + songs.size() + " " + songs.get(songIndex).toString());
+        play();
         sendBroadcastToActivity(ACTION_NEXT);
     }
 
@@ -245,8 +291,8 @@ public class SongService extends Service {
         if (mediaPlayer != null && isPlaying) {
             mediaPlayer.pause();
             isPlaying = false;
-            sendNotification();
             sendBroadcastToActivity(ACTION_PAUSE);
+            sendNotification();
         }
     }
 
@@ -256,7 +302,9 @@ public class SongService extends Service {
 
         Bundle bundle = new Bundle();
         bundle.putSerializable(App.CURRENT_SONG, song);
+        bundle.putSerializable(App.SONGS_ARG, songs);
         bundle.putBoolean(App.IS_PLAYING, isPlaying);
+        bundle.putInt(App.SONG_INDEX, songIndex);
         bundle.putInt(App.ACTION_TYPE, action);
 
         intent.putExtras(bundle);

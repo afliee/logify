@@ -17,9 +17,9 @@
 
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/_50dp"
             android:id="@+id/toolbar"
-            android:elevation="4dp"
+            android:elevation="0dp"
             android:background="@color/transparent"
             android:theme="@style/Theme.Logify"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>

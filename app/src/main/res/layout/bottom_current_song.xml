@@ -72,6 +72,12 @@
                 android:layout_width="@dimen/_32dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/baseline_play_arrow_24" />
+
+            <ImageView
+                android:id="@+id/next"
+                android:layout_width="@dimen/_32dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/baseline_skip_next_24" />
         </LinearLayout>
     </RelativeLayout>
 

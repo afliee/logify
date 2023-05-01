@@ -72,13 +72,17 @@ public class AlbumModel extends Model {
 
                                 String url = songObject.optString("url");
                                 ArrayList<String> artistIds = new ArrayList<>();
+                                ArrayList<String> artistNames = new ArrayList<>();
 
-
-                                for (int j = 0; j < artistsIdArray.length(); j++) {
-                                    JSONObject artistId = artistsIdArray.optJSONObject(j);
-                                    String artistIdStr = artistId.optString("id");
-                                    artistIds.add(artistIdStr);
-                                    artistContributor.add(artistIdStr);
+                                if (artistsIdArray != null) {
+                                    for (int j = 0; j < artistsIdArray.length(); j++) {
+                                        JSONObject artistId = artistsIdArray.optJSONObject(j);
+                                        String artistIdStr = artistId.optString("id");
+                                        String artistNameStr = artistId.optString("name");
+                                        artistNames.add(artistNameStr);
+                                        artistIds.add(artistIdStr);
+                                        artistContributor.add(artistIdStr);
+                                    }
                                 }
 
                                 ArrayList<String> genres = new ArrayList<>();
@@ -88,7 +92,7 @@ public class AlbumModel extends Model {
                                     genres.add(genre);
                                 }
 
-                                Song song = new Song(id, name, artistIds, thumbnail, url, releaseDateStr, artistName, duration, genres);
+                                Song song = new Song(id, name, artistIds, artistNames, thumbnail, url, releaseDateStr, artistName, duration, genres);
                                 songs.add(song);
                             }
                         }
@@ -96,8 +100,8 @@ public class AlbumModel extends Model {
                             album.setSongs(songs);
                             album.setArtistIds(artistContributor);
                             listener.onAlbumFound(album);
+                            return;
                         }
-                        return;
                     }
                 }
                 listener.onAlbumNotExist();

@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/ripple_effect">
-    <com.google.android.material.imageview.ShapeableImageView
+    <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/image"
         android:layout_width="52dp"
         android:layout_height="52dp"
@@ -18,35 +18,24 @@
         app:riv_border_color="#66F5F5F5"
         android:layout_marginStart="15dp"
         />
+
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/description"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="28dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/menu_button"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/image"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/menu_button"
-        tools:text="Blame"
-        android:textSize="14sp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:layout_marginStart="12dp"/>
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintEnd_toStartOf="@id/menu_button"
-        android:textStyle="bold"
-        tools:text="KYLE."
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="13sp"
-        />
+        tools:text="Blame" />
+
     <ImageView
         android:id="@+id/menu_button"
         android:layout_width="74dp"
@@ -57,16 +46,5 @@
         app:srcCompat="@drawable/ic_more_horiz_24dp"
         android:padding="22dp"
         android:background="@drawable/ripple_effect"/>
-    <ImageView
-        android:id="@+id/quick_play_pause"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="@id/image"
-        app:layout_constraintEnd_toEndOf="@id/image"
-        app:layout_constraintTop_toTopOf="@id/image"
-        app:layout_constraintBottom_toBottomOf="@id/image"
-        android:elevation="1dp"
-        android:alpha="0.55"
-        android:src="@drawable/round_play_arrow_24"
-        app:tint="#394545" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
