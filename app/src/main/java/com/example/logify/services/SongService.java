@@ -69,6 +69,13 @@ public class SongService extends Service {
         super.onCreate();
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    Log.e(TAG, "onCompletion: finish song " + song.toString());
+                    next();
+                }
+            });
         }
         Log.e(TAG, "onCreate: SongService created");
     }

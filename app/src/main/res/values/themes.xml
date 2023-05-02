@@ -15,11 +15,12 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/transitionShapeAppearance</item>
         <!-- Customize your theme here. -->
+        <item name="iconTintColor">@color/FlatWhite</item>
     </style>
 
-    <style name="Theme.SlashScreen" parent="Theme.AppCompat.DayNight.NoActionBar" >
-        <item name = "android:windowActionBar">false</item>
-        <item name = "android:windowNoTitle">true</item>
+    <style name="Theme.SlashScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
 
         <item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -31,16 +32,16 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:windowFullscreen">true</item>
-<!--        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>-->
-<!--        <item name="android:windowDrawsSystemBarBackgrounds" tools:targetApi="lollipop">true</item>-->
+        <!--        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>-->
+        <!--        <item name="android:windowDrawsSystemBarBackgrounds" tools:targetApi="lollipop">true</item>-->
         <item name="windowActionBarOverlay">true</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">@color/FlatWhite</item>
         <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
     </style>
 
     <style name="Theme.OnBoarding" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name = "android:windowActionBar">false</item>
-        <item name = "android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="colorPrimary">@color/blue_primary</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/black</item>
@@ -55,8 +56,8 @@
     </style>
 
     <style name="Theme.AuthScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name = "android:windowActionBar">false</item>
-        <item name = "android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="colorPrimary">@color/blue_primary</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/black</item>
@@ -70,7 +71,7 @@
         <item name="android:windowFullscreen">true</item>
 
     </style>
-    
+
     <style name="DialogAnimation">
         <item name="android:windowEnterAnimation">@anim/fade_in</item>
         <item name="android:windowExitAnimation">@anim/fade_out</item>
@@ -82,6 +83,15 @@
         <item name="colorPrimary">@color/blue_primary</item>
         <item name="colorPrimaryDark">@color/blueEnd</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="iconTintColor">@color/fifty_percent_black_overlay</item>
+    </style>
+
+    <style name="AppTheme.Light" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorPrimaryDark">@color/blueEnd</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="iconTintColor">@color/FlatWhite</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
@@ -90,4 +100,11 @@
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="ThemeOverlay.Logify.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
+        <item name="fullscreenTextColor">@color/light_blue_A200</item>
+    </style>
+
+
 </resources>

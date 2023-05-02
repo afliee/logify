@@ -66,4 +66,5 @@
     <dimen name="list_item_spacing">16dp</dimen>
     <dimen name="list_item_spacing_half">8dp</dimen>
     <dimen name="artist_contribution_header_text_size">20sp</dimen>
+    <dimen name="corner_image_song_size">300dp</dimen>
 </resources>

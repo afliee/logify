@@ -35,6 +35,7 @@ import com.example.logify.entities.Song;
 import com.example.logify.fragments.AboutUsFragment;
 import com.example.logify.fragments.HomeFragment;
 import com.example.logify.fragments.LibraryFragment;
+import com.example.logify.fragments.PlayerFragment;
 import com.example.logify.fragments.ProfileFragment;
 import com.example.logify.fragments.SearchFragment;
 import com.example.logify.fragments.SettingFragment;
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
-//        bottomNavigationView.setBackground(null);
+        bottomNavigationView.setBackground(null);
 //        bottomNavigationView.setBackgroundColor(Color.TRANSPARENT);
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -206,6 +207,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 Log.e(TAG, "onClick: btn next clicked");
                 sendBroadcastToService(SongService.ACTION_NEXT);
+            }
+        });
+
+        bottomCurrentSong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "onClick: bottom current song clicked");
+//                show full screen fragment
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                PlayerFragment playerFragment = new PlayerFragment();
+//                add bundle to fragment
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("song", currentSong);
+                playerFragment.setArguments(bundle);
+                fragmentTransaction.replace(R.id.frame_layout, playerFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
             }
         });
     }

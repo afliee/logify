@@ -65,5 +65,8 @@
     <string name="see_all">See all</string>
     <string name="artist_contributor">Artists Contribution</string>
     <string name="genres_album">Genre Albums</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="back_button">Back Button</string>
 
 </resources>

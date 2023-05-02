@@ -1,12 +1,14 @@
 package com.example.logify.fragments;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +35,7 @@ import com.example.logify.models.AlbumModel;
 import com.example.logify.models.ArtistModel;
 import com.example.logify.services.SongService;
 import com.example.logify.utils.BlurTransformation;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -63,6 +66,19 @@ public class ViewAlbumFragment extends Fragment {
     private LinearLayout llArtistContributorsTitle;
     private Context context = getContext();
     private Activity activity;
+    private boolean isPlaying = false;
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                isPlaying = bundle.getBoolean(App.IS_PLAYING);
+                int action = bundle.getInt(App.ACTION_TYPE);
+                Log.e(TAG, "onReceive: recieve " + action + " " + isPlaying);
+                handleActionReceive(action);
+            }
+        }
+    };
 
     public ViewAlbumFragment() {
         // Required empty public constructor
@@ -108,6 +124,7 @@ public class ViewAlbumFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, SongService.getIntentFilter());
         album = (Album) getArguments().getSerializable(ALBUM_ARG);
         // Inflate the layout for this fragment
         View albumView = inflater.inflate(R.layout.fragment_view_album, container, false);
@@ -149,6 +166,25 @@ public class ViewAlbumFragment extends Fragment {
         });
     }
 
+    private void handleActionReceive(int action) {
+        switch (action) {
+            case SongService.ACTION_START:
+            case SongService.ACTION_PLAY_ALBUM:
+            case SongService.ACTION_RESUME:
+            case SongService.ACTION_PAUSE:{
+                updateStatusUI();
+                break;
+            }
+        }
+    }
+
+    private void updateStatusUI() {
+        if (isPlaying) {
+            btnPlayAlbum.setImageResource(R.drawable.baseline_pause_24);
+        } else {
+            btnPlayAlbum.setImageResource(R.drawable.baseline_play_arrow_24);
+        }
+    }
     private void initLayoutUI() {
         ArrayList<Song> songs = album.getSongs();
         ArrayList<String> artists = album.getArtistIds();
@@ -189,12 +225,20 @@ public class ViewAlbumFragment extends Fragment {
         btnPlayAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isPlaying = true;
                 ArrayList<Song> songs = album.getSongs();
                 Intent intent = new Intent(getContext(), SongService.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(App.SONGS_ARG, songs);
-                intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PLAY_ALBUM);
+
+                if (isPlaying) {
+                    intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PLAY_ALBUM);
+                } else {
+                    intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PAUSE);
+                }
+
                 intent.putExtra(App.SONG_INDEX, 0);
+                intent.putExtra(App.IS_PLAYING, isPlaying);
                 intent.putExtras(bundle);
                 getContext().startService(intent);
             }
@@ -243,5 +287,11 @@ public class ViewAlbumFragment extends Fragment {
         intent.putExtra(App.SONG_INDEX, position);
         intent.putExtras(bundle);
         getContext().startService(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiver);
     }
 }
