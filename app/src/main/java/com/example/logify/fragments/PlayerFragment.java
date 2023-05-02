@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -107,6 +109,16 @@ public class PlayerFragment extends Fragment {
         seekBar = view.findViewById(R.id.seek_bar);
         
         initUI();
+        handleBackAction();
+    }
+
+    private void handleBackAction() {
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
     }
 
     private void initUI() {
@@ -125,8 +137,10 @@ public class PlayerFragment extends Fragment {
             seekBar.setMax(song.getDuration());
 
             tvSongName.setText(song.getName());
-            tvSongAtistName.setText(song.getArtistName());
+            tvSongAtistName.setText(song.getReleaseDate());
 
+            Animation imageRotation = AnimationUtils.loadAnimation(context, R.anim.thumb_rotation);
+            imgSong.startAnimation(imageRotation);
         }
     }
 
