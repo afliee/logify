@@ -17,10 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.logify.R;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Topic;
+import com.example.logify.entities.User;
 import com.example.logify.fragments.ViewAlbumFragment;
 import com.example.logify.models.AlbumModel;
+import com.example.logify.models.UserModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHolder> {
     private static final String TAG = "TopicAdapter";
@@ -28,6 +33,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
     private ArrayList<Topic> topics;
     private AlbumAdapter albumAdapter;
     private AlbumModel albumModel = new AlbumModel();
+    private UserModel userModel = new UserModel();
 
     public TopicAdapter(Context context, ArrayList<Topic> topics) {
         this.context = context;
@@ -79,16 +85,77 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
                     @Override
                     public void onAlbumFound(Album album) {
                         Log.e(TAG, "onItemClick: " + position + album.toString());
+                        HashMap<String, Object> data = new HashMap<>();
+                        data.put("albumId", album.getId());
+                        data.put("albumName", album.getName());
+                        String userId = userModel.getCurrentUser();
+                        String key = "recentlyPlayed";
+                        userModel.getConfig(userId, key, new UserModel.onGetConfigListener() {
+                            @Override
+                            public void onCompleted(List<Map<String, Object>> config) {
+                                if (config == null) {
+                                    config = new ArrayList<>();
+                                }
+
+                                if (config.size() == 0) {
+                                    config.add(data);
+                                } else {
+                                    for (int i = 0; i < config.size(); i++) {
+                                        if (config.get(i).get("albumId").equals(album.getId())) {
+                                            config.remove(i);
+                                            break;
+                                        }
+                                    }
+                                    config.add(0, data);
+                                }
+
+                                userModel.updateConfig(userId, key, config, new UserModel.onAddConfigListener() {
+                                    @Override
+                                    public void onCompleted() {
+                                        AppCompatActivity activity = (AppCompatActivity) context;
+                                        FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                                        Bundle bundle = new Bundle();
+                                        bundle.putSerializable("album", album);
+                                        ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                                        viewAlbumFragment.setArguments(bundle);
+                                        fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+                                        fragmentTransaction.addToBackStack(null);
+                                        fragmentTransaction.commit();
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+                                        Log.e(TAG, "onFailure: erorr " + album.getName());
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure() {
+
+                            }
+                        });
+//                        userModel.updateConfig(userId, key, data, new UserModel.onAddConfigListener() {
+//                            @Override
+//                            public void onCompleted() {
+//                                AppCompatActivity activity = (AppCompatActivity) context;
+//                                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+//                                Bundle bundle = new Bundle();
+//                                bundle.putSerializable("album", album);
+//                                ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+//                                viewAlbumFragment.setArguments(bundle);
+//                                fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+//                                fragmentTransaction.addToBackStack(null);
+//                                fragmentTransaction.commit();
+//                            }
+//
+//                            @Override
+//                            public void onFailure() {
+//                                Log.e(TAG, "onFailure: erorr " + album.getName());
+//                            }
+//                        });
 //                handle the click event and replace the fragment
-                        AppCompatActivity activity = (AppCompatActivity) context;
-                        FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("album", album);
-                        ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
-                        viewAlbumFragment.setArguments(bundle);
-                        fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
-                        fragmentTransaction.addToBackStack(null);
-                        fragmentTransaction.commit();
+
                     }
 
                     @Override

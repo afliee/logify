@@ -67,4 +67,6 @@
     <dimen name="list_item_spacing_half">8dp</dimen>
     <dimen name="artist_contribution_header_text_size">20sp</dimen>
     <dimen name="corner_image_song_size">300dp</dimen>
+    <dimen name="recently_played_item_height">50dp</dimen>
+    <dimen name="recently_played_title_size">14sp</dimen>
 </resources>

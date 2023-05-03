@@ -16,9 +16,9 @@
             android:id="@+id/tvCategoryName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Category name"
-            android:layout_weight="1"
             android:layout_marginBottom="@dimen/_8dp"
+            android:layout_weight="1"
+            android:text="Category name"
             android:textSize="@dimen/category_title_size"
             android:textStyle="bold" />
 

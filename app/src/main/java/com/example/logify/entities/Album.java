@@ -2,6 +2,8 @@ package com.example.logify.entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Album implements Serializable {
     private String id;
@@ -101,7 +103,6 @@ public class Album implements Serializable {
     public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
     }
-
 
     @Override
     public String toString() {

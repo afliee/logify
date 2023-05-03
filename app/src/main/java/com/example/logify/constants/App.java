@@ -16,4 +16,7 @@ public class App {
     public static final String ARTIST_ARG = "artist";
     public static final String SONGS_ARG = "songs";
     public static final String IN_NOW_PLAYING = "nowPlaying";
+
+//    configuration
+    public static final String CONFIGURATION = "configuration";
 }

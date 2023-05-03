@@ -8,24 +8,27 @@ import androidx.annotation.NonNull;
 
 import com.example.logify.auth.ForgotPasswordActivity;
 import com.example.logify.auth.OTPVerifyActivity;
-import com.example.logify.entities.Playlist;
+import com.example.logify.constants.App;
+import com.example.logify.constants.Schema;
 import com.example.logify.entities.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 //this class is used to store data of user reference to firebase
@@ -44,6 +47,15 @@ public class UserModel extends Model{
         void onCallback(User user);
     }
 
+    public interface onAddConfigListener {
+        void onCompleted();
+        void onFailure();
+    }
+
+    public interface onGetConfigListener {
+        void onCompleted(List<Map<String, Object>> config);
+        void onFailure();
+    }
     public interface LoginCallBacks {
         void onCompleted(User user);
         void onFailure();
@@ -268,5 +280,56 @@ public class UserModel extends Model{
 
     public void updatePassword(String uuid, String newPassword) {
         database.child(USER_COLLECTION).child(uuid).child("password").setValue(newPassword);
+    }
+
+    public void updateConfig(String userId,String key, List<Map<String, Object>> values, onAddConfigListener listener) {
+        Query query = database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(key);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(key).removeValue();
+                    database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(key).setValue(values);
+                }else {
+                    database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(key).setValue(values);
+                }
+                listener.onCompleted();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: error occur " + error.toString());
+                listener.onFailure();
+            }
+        });
+    }
+
+    public void getConfig(String userId, String key, onGetConfigListener listener) {
+        Query query = database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(key);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Object values = snapshot.getValue();
+                    List<Map<String, Object>> list = new ArrayList<>();
+                    if (values instanceof List) {
+                        for (Object object : (List) values) {
+                            if (object instanceof Map) {
+                                list.add((Map<String, Object>) object);
+                            }
+                        }
+                    }
+                    listener.onCompleted(list);
+                } else {
+                    listener.onCompleted(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: error occur " + error.toString());
+                listener.onFailure();
+            }
+        });
     }
 }
