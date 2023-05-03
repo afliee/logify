@@ -46,7 +46,7 @@ import java.util.ArrayList;
  */
 public class ViewAlbumFragment extends Fragment {
     private static final String TAG = "ViewAlbumFragment";
-//    params
+    //    params
     private static final String ALBUM_ARG = "album";
 
     // TODO: Rename and change types of parameters
@@ -67,6 +67,7 @@ public class ViewAlbumFragment extends Fragment {
     private Context context = getContext();
     private Activity activity;
     private boolean isPlaying = false;
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -105,7 +106,7 @@ public class ViewAlbumFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             album = (Album) getArguments().getSerializable(ALBUM_ARG);
-            Log.e(TAG, "onCreate: " + album.toString() );
+            Log.e(TAG, "onCreate: " + album.toString());
         }
     }
 
@@ -119,6 +120,13 @@ public class ViewAlbumFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         activity = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume: suzumeeeeeeeeeee");
+        updateStatusUI();
     }
 
     @Override
@@ -160,7 +168,7 @@ public class ViewAlbumFragment extends Fragment {
 
             @Override
             public void onItemClick(Song song, int position) {
-                Log.e(TAG, "onItemClick: " + song.toString() );
+                Log.e(TAG, "onItemClick: " + song.toString());
                 sendActionToService(SongService.ACTION_PLAY, position);
             }
         });
@@ -171,7 +179,8 @@ public class ViewAlbumFragment extends Fragment {
             case SongService.ACTION_START:
             case SongService.ACTION_PLAY_ALBUM:
             case SongService.ACTION_RESUME:
-            case SongService.ACTION_PAUSE:{
+            case SongService.ACTION_PAUSE:
+            case SongService.ACTION_CLOSE:{
                 updateStatusUI();
                 break;
             }
@@ -185,12 +194,13 @@ public class ViewAlbumFragment extends Fragment {
             btnPlayAlbum.setImageResource(R.drawable.baseline_play_arrow_24);
         }
     }
+
     private void initLayoutUI() {
         ArrayList<Song> songs = album.getSongs();
         ArrayList<String> artists = album.getArtistIds();
-        ArrayList<Artist>  artistArrayList = new ArrayList<>();
+        ArrayList<Artist> artistArrayList = new ArrayList<>();
         ArrayList<String> artistNames = new ArrayList<>();
-        for (String artistId: artists) {
+        for (String artistId : artists) {
             Artist artist = artistModel.getArtistById(artistId);
             if (artist != null) {
                 artistArrayList.add(artist);

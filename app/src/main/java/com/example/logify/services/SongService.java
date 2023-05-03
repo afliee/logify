@@ -37,6 +37,7 @@ import com.example.logify.MainApplication;
 import com.example.logify.R;
 import com.example.logify.constants.App;
 import com.example.logify.entities.Song;
+import com.example.logify.models.SongModel;
 import com.example.logify.receivers.SongReceiver;
 
 import java.net.URL;
@@ -54,13 +55,15 @@ public class SongService extends Service {
     public static final int ACTION_PREVIOUS = 6;
     public static final int ACTION_CLOSE = 7;
     public static final int ACTION_PLAY_ALBUM = 8;
+    public static final int ACTION_PLAY_BACK = 9;
 
     private Song song;
     private ArrayList<Song> songs;
     private int songIndex;
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false;
-
+    private boolean isNowPlaying = false;
+    private SongModel songModel = new SongModel();
     public SongService() {
     }
 
@@ -97,7 +100,8 @@ public class SongService extends Service {
 
             songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
             if (songs != null) {
-                songIndex = bundle.getInt("songIndex");
+                songIndex = bundle.getInt(App.SONG_INDEX);
+                isNowPlaying = bundle.getBoolean(App.IN_NOW_PLAYING);
                 song = songs.get(songIndex);
                 Log.e(TAG, "onStartCommand: hadnle " + songIndex + " " + song.toString());
 //                play();
@@ -131,12 +135,25 @@ public class SongService extends Service {
         try {
             mediaPlayer.reset();
             if (!song.getResource().isEmpty()) {
-                mediaPlayer.setDataSource(this, Uri.parse(song.getResource()));
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-                isPlaying = true;
-                sendNotification();
-                sendBroadcastToActivity(ACTION_START);
+                songModel.find(song.getId() + ".mp3", new SongModel.OnSongFindListener() {
+                    @Override
+                    public void onSongFind(Uri songUri) {
+                        try {
+                            mediaPlayer.setDataSource(SongService.this, songUri);
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+                            isPlaying = true;
+                            sendNotification();
+                            sendBroadcastToActivity(ACTION_START);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onSongNotExist() {
+                        Toast.makeText(SongService.this, "Resource song not found", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
                 Toast.makeText(this, "Resource song not found", Toast.LENGTH_SHORT).show();
             }
@@ -246,6 +263,9 @@ public class SongService extends Service {
             case ACTION_PREVIOUS:
                 previous();
                 break;
+            case ACTION_PLAY_BACK:
+                playBack();
+                break;
             case ACTION_CLOSE:
                 stopSelf();
                 sendBroadcastToActivity(ACTION_CLOSE);
@@ -265,6 +285,10 @@ public class SongService extends Service {
         } else {
             Log.e(TAG, "resume: with conditions : " + mediaPlayer + " " + isPlaying);
         }
+    }
+
+    private void playBack() {
+        sendBroadcastToActivity(ACTION_PLAY_BACK);
     }
 
     private void previous() {
@@ -312,6 +336,7 @@ public class SongService extends Service {
         bundle.putSerializable(App.SONGS_ARG, songs);
         bundle.putBoolean(App.IS_PLAYING, isPlaying);
         bundle.putInt(App.SONG_INDEX, songIndex);
+        bundle.putBoolean(App.IN_NOW_PLAYING, isNowPlaying);
         bundle.putInt(App.ACTION_TYPE, action);
 
         intent.putExtras(bundle);

@@ -1,5 +1,8 @@
 package com.example.logify.entities;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Playlist {
     private String id;
     private String playlistName;
@@ -75,6 +78,16 @@ public class Playlist {
         this.createdDate = createdDate;
     }
 
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("id", id);
+        result.put("name", playlistName);
+        result.put("description", description);
+        result.put("image", image);
+        result.put("userId", userId);
+        result.put("createdDate", createdDate);
+        return result;
+    }
     @Override
     public String toString() {
         return "Playlist{" +

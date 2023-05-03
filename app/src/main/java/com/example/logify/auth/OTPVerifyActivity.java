@@ -209,7 +209,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
                             FirebaseUser user = task.getResult().getUser();
                             // Create a new user with a first and last name
-                            userModel.addUserWithPhone(user.getUid(), username, phoneNumber, password);
+                            userModel.addUserWithPhone(user.getUid(), username, phoneNumber, password, user.getUid());
                             SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString("uuid", user.getUid());

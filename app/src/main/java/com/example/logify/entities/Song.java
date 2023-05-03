@@ -2,6 +2,8 @@ package com.example.logify.entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Song implements Serializable {
     private String id;
@@ -128,6 +130,25 @@ public class Song implements Serializable {
         this.releaseDate = releaseDate;
     }
 
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("id", this.id);
+        result.put("name", this.name);
+        result.put("artistId", this.artistId);
+        result.put("imageResource", this.imageResource);
+        if (this.getArtistName() != null) {
+            result.put("artistName", this.getArtistName());
+        }
+        if (this.getArtistsId() != null) {
+            result.put("artistsId", this.getArtistsId());
+        }
+        result.put("artistName", artistName);
+        result.put("duration", duration);
+        result.put("genres", genres);
+        result.put("releaseDate", releaseDate);
+
+        return result;
+    }
     @Override
     public String toString() {
         return "Song{" +

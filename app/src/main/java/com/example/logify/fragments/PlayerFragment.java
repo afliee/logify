@@ -1,12 +1,15 @@
 package com.example.logify.fragments;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,7 +27,10 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.logify.R;
 import com.example.logify.constants.App;
 import com.example.logify.entities.Song;
+import com.example.logify.services.SongService;
 import com.example.logify.utils.BlurTransformation;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,7 +41,8 @@ public class PlayerFragment extends Fragment {
 
     private static final String TAG = "PlayerFragment";
     private Song song;
-
+    private ArrayList<Song> songs;
+    private int songIndex;
     private ImageView blurImageBackground, imgSong;
     private ImageView btnShare, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat, btnBack;
     private TextView tvSeekbarCurrentPosition, tvSeekbarDuration;
@@ -43,6 +50,28 @@ public class PlayerFragment extends Fragment {
     private SeekBar seekBar;
     private Context context = getContext();
     private Activity activity = getActivity();
+
+    private boolean isPlaying = false;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                isPlaying = bundle.getBoolean(App.IS_PLAYING);
+                song = (Song) bundle.getSerializable(App.CURRENT_SONG);
+                int action = bundle.getInt(App.ACTION_TYPE);
+                songIndex = bundle.getInt(App.SONG_INDEX);
+                songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
+                if (songs != null) {
+                    Log.e(TAG, "onReceive: song: " + songs.size());
+                }
+                Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying );
+                handleActionReceive(action);
+            }
+        }
+    };
+
     public PlayerFragment() {
         // Required empty public constructor
     }
@@ -77,17 +106,32 @@ public class PlayerFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        song = (Song) getArguments().getSerializable(App.CURRENT_SONG);
-        Log.e(TAG, "onCreateView: receive song: " + song.toString());
+        Bundle bundle = getArguments();
+        song = (Song) bundle.getSerializable(App.CURRENT_SONG);
+        songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
+        isPlaying = bundle.getBoolean(App.IS_PLAYING);
+        songIndex = bundle.getInt(App.SONG_INDEX);
+        if (songs != null) {
+            Log.e(TAG, "onCreateView: songs size receive: " + songs.size());
+        }
+        Log.e(TAG, "onCreateView: receive song: " + song.getName());
+        LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, SongService.getIntentFilter());
         return inflater.inflate(R.layout.fragment_player, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         blurImageBackground = view.findViewById(R.id.blur_image_background);
         imgSong = view.findViewById(R.id.image_song);
 
@@ -107,15 +151,78 @@ public class PlayerFragment extends Fragment {
         tvSongAtistName = view.findViewById(R.id.song_artist_name);
 
         seekBar = view.findViewById(R.id.seek_bar);
-        
+
         initUI();
         handleBackAction();
+        handleActions();
+    }
+
+    private void handleActions() {
+        btnPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isPlaying) {
+                    sendBroadcastToService(SongService.ACTION_PAUSE);
+                } else {
+                    sendBroadcastToService(SongService.ACTION_RESUME);
+                }
+            }
+        });
+
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendBroadcastToService(SongService.ACTION_NEXT);
+            }
+        });
+
+        btnPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendBroadcastToService(SongService.ACTION_PREVIOUS);
+            }
+        });
+    }
+
+    private void handleActionReceive(int action) {
+        switch (action) {
+            case SongService.ACTION_START:
+            case SongService.ACTION_PLAY:
+            case SongService.ACTION_PAUSE:
+            case SongService.ACTION_RESUME:{
+                updateStatusUI();
+                break;
+            }
+            case SongService.ACTION_NEXT:{
+                updateStatusUI();
+                initUI();
+                break;
+            }
+
+        }
+    }
+
+    private void updateUI() {
+        if (song != null && activity != null) {
+            tvSongName.setText(song.getName());
+            tvSongAtistName.setText(song.getArtistName());
+
+        }
+    }
+
+    private void updateStatusUI() {
+        if (isPlaying) {
+            btnPlay.setImageResource(R.drawable.baseline_pause_24);
+        } else {
+            btnPlay.setImageResource(R.drawable.baseline_play_arrow_24);
+        }
     }
 
     private void handleBackAction() {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sendBroadcastToService(SongService.ACTION_PLAY_BACK);
                 getActivity().onBackPressed();
             }
         });
@@ -141,9 +248,27 @@ public class PlayerFragment extends Fragment {
 
             Animation imageRotation = AnimationUtils.loadAnimation(context, R.anim.thumb_rotation);
             imgSong.startAnimation(imageRotation);
+
+            if (isPlaying) {
+                btnPlay.setImageResource(R.drawable.baseline_pause_24);
+            } else {
+                btnPlay.setImageResource(R.drawable.baseline_play_arrow_24);
+            }
         }
     }
 
+
+    private void sendBroadcastToService(int action) {
+        Intent intent = new Intent(getContext(), SongService.class);
+        intent.putExtra(App.ACTION_TYPE, action);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(App.SONGS_ARG, songs);
+        bundle.putSerializable(App.CURRENT_SONG, song);
+        bundle.putInt(App.SONG_INDEX, songIndex);
+        bundle.putBoolean(App.IN_NOW_PLAYING, true);
+        intent.putExtras(bundle);
+        getActivity().startService(intent);
+    }
     private String durationToString(int duration) {
         int minutes = duration / 60;
         int seconds = duration % 60;

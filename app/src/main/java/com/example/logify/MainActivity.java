@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArrayList<Song> songs;
     private boolean isPlaying = false;
     private int songIndex;
+    private int action;
+    private boolean isNowPlaying = false;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -74,8 +76,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
                 songIndex = bundle.getInt(App.SONG_INDEX);
                 isPlaying = bundle.getBoolean(App.IS_PLAYING);
-
-                int action = bundle.getInt(App.ACTION_TYPE);
+                isNowPlaying = bundle.getBoolean(App.IN_NOW_PLAYING);
+                action = bundle.getInt(App.ACTION_TYPE);
+                Log.e(TAG, "onReceive: " + action + " " + currentSong.getName() + " " + isPlaying + " " + isNowPlaying);
+                if (songs != null) {
+                    Log.e(TAG, "onReceive: songs size: " + songs.size());
+                } else {
+                    Log.e(TAG, "onReceive: songs is empty 🤏" );
+                }
                 handleLayoutCurrentSong(action);
             }
         }
@@ -169,6 +177,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     private void handlePermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             String[] permissions = new String[] {
@@ -220,11 +233,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 PlayerFragment playerFragment = new PlayerFragment();
 //                add bundle to fragment
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("song", currentSong);
+                bundle.putSerializable(App.CURRENT_SONG, currentSong);
+                bundle.putSerializable(App.SONGS_ARG, songs);
+                bundle.putInt(App.SONG_INDEX, songIndex);
+                bundle.putBoolean(App.IS_PLAYING, isPlaying);
                 playerFragment.setArguments(bundle);
                 fragmentTransaction.replace(R.id.frame_layout, playerFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
+
+                bottomCurrentSong.setVisibility(View.GONE);
             }
         });
     }
@@ -250,6 +268,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 updateCurrentSongUI();
                 break;
             }
+            case SongService.ACTION_PLAY_BACK: {
+                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom with action " + action);
+                bottomCurrentSong.setVisibility(View.VISIBLE);
+                break;
+            }
             case SongService.ACTION_CLOSE: {
                 Log.e(TAG, "handleLayoutCurrentSong: hide current song bottom");
                 bottomCurrentSong.setVisibility(View.GONE);
@@ -260,13 +283,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateCurrentSongUI() {
-        if (currentSong != null) {
+        if (currentSong != null  && !isNowPlaying) {
             bottomCurrentSong.setVisibility(View.VISIBLE);
             songTitle.setText(currentSong.getName());
             songArtist.setText(currentSong.getArtistName());
             Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
         } else {
             bottomCurrentSong.setVisibility(View.GONE);
+            songTitle.setText(currentSong.getName());
+            songArtist.setText(currentSong.getArtistName());
+            Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.example.logify.auth.ForgotPasswordActivity;
 import com.example.logify.auth.OTPVerifyActivity;
+import com.example.logify.entities.Playlist;
 import com.example.logify.entities.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -24,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.time.LocalTime;
 import java.util.concurrent.TimeUnit;
 
 //this class is used to store data of user reference to firebase
@@ -36,7 +38,7 @@ public class UserModel extends Model{
     private PhoneAuthOptions options;
 //    private FirebaseAuth mAuth;
     private String vetificationId = "";
-
+    private PlaylistModel playlistModel = new PlaylistModel();
 
     public interface UserCallBacks {
         void onCallback(User user);
@@ -71,13 +73,14 @@ public class UserModel extends Model{
     }
 
 
-    public void addUserWithPhone(String uuid, String username, String phoneNumber, String password) {
-        User user = new User(uuid, username, phoneNumber, password);
+    public void addUserWithPhone(String uuid, String username, String phoneNumber, String password, String playlistId) {
+        User user = new User(uuid, username, phoneNumber, password, playlistId);
         database.child(USER_COLLECTION).child(uuid).setValue(user.toMap())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.e(TAG, "onComplete: write data successfull ");
+                        playlistModel.add(uuid, "Your favorite songs", "This is your favorite songs", "", uuid, LocalTime.now().toString());
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -90,12 +93,13 @@ public class UserModel extends Model{
     }
 
     public void addUserWithGoogle(String uuid, String username, String email, Uri avatar) {
-        User user = new User(uuid, username, email, avatar);
+        User user = new User(uuid, username, email, avatar, uuid);
         database.child(USER_COLLECTION).child(uuid).setValue(user.toMap())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.e(TAG, "onComplete: write data successfull ");
+                        playlistModel.add(uuid, "Your favorite songs", "This is your favorite songs", "", uuid, LocalTime.now().toString());
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -106,9 +110,22 @@ public class UserModel extends Model{
                 });
     }
 
+    public String getCurrentUser() {
+        if (mAuth.getCurrentUser() != null) {
+            return mAuth.getCurrentUser().getUid();
+        } else {
+            return null;
+        }
+    }
+
     public void updateUser(String uuid, String username, String avatar) {
-        database.child(USER_COLLECTION).child(uuid).child("username").setValue(username);
-        database.child(USER_COLLECTION).child(uuid).child("avatar").setValue(avatar);
+        if (username != null) {
+            database.child(USER_COLLECTION).child(uuid).child("username").setValue(username);
+        }
+
+        if (avatar != null) {
+            database.child(USER_COLLECTION).child(uuid).child("avatar").setValue(avatar);
+        }
     }
 
     public void getUser(String uuid, UserCallBacks callBacks) {

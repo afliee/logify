@@ -11,6 +11,7 @@ public class User {
     private String phoneNumber;
     private String password;
     private Uri avatar;
+    private String playlistId;
 
     public User() {
     }
@@ -22,9 +23,22 @@ public class User {
         this.password = password;
     }
 
+    public User(String uuid, String username, String phoneNumber, String password, String playlistId) {
+        this.uuid = uuid;
+        this.username = username;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+        this.playlistId = playlistId;
+    }
     public User(String uuid, String username, String email, Uri avatar) {
         this(uuid, username, email, avatar.toString());
         this.avatar = avatar;
+    }
+
+    public User(String uuid, String username, String email, Uri avatar, String playlistId) {
+        this(uuid, username, email, avatar.toString());
+        this.avatar = avatar;
+        this.playlistId = playlistId;
     }
 
     public String getPassword() {
@@ -37,6 +51,14 @@ public class User {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public String getPlaylistId() {
+        return playlistId;
+    }
+
+    public void setPlaylistId(String playlistId) {
+        this.playlistId = playlistId;
     }
 
     public void setUuid(String uuid) {
@@ -84,12 +106,14 @@ public class User {
             result.put("username", username);
             result.put("phoneNumber", phoneNumber);
             result.put("password", password);
+            result.put("playlistId", playlistId);
             result.put("avatar", "");
         } else { // user logined with google
             result.put("uuid", uuid);
             result.put("username", username);
             result.put("phoneNumber", "");
             result.put("email", phoneNumber);
+            result.put("playlistId", playlistId);
             result.put("avatar", avatar.toString());
         }
         return result;
@@ -102,7 +126,8 @@ public class User {
                 ", username='" + username + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", password='" + password + '\'' +
-                ", avatar=" + avatar +
+                ", avatar=" + avatar.toString() +
+                ", playlistId='" + playlistId + '\'' +
                 '}';
     }
 }
