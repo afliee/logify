@@ -19,4 +19,7 @@ public class App {
 
 //    configuration
     public static final String CONFIGURATION = "configuration";
+    public static final String CONFIG_RECENTLY_PLAYLED = "recentlyPlayed";
+    public static final String SHARED_PREFERENCES_UUID = "uuid";
+    public static final String SHARED_PREFERENCES_USER = "user";
 }

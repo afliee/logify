@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -26,11 +27,17 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.logify.R;
 import com.example.logify.constants.App;
+import com.example.logify.constants.Schema;
 import com.example.logify.entities.Song;
+import com.example.logify.models.PlaylistModel;
+import com.example.logify.models.UserModel;
 import com.example.logify.services.SongService;
 import com.example.logify.utils.BlurTransformation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,6 +59,9 @@ public class PlayerFragment extends Fragment {
     private Activity activity = getActivity();
 
     private boolean isPlaying = false;
+    private boolean isLike = false;
+    private UserModel userModel;
+    private PlaylistModel playlistModel;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -66,7 +76,7 @@ public class PlayerFragment extends Fragment {
                 if (songs != null) {
                     Log.e(TAG, "onReceive: song: " + songs.size());
                 }
-                Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying );
+                Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying);
                 handleActionReceive(action);
             }
         }
@@ -120,6 +130,8 @@ public class PlayerFragment extends Fragment {
         songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
         isPlaying = bundle.getBoolean(App.IS_PLAYING);
         songIndex = bundle.getInt(App.SONG_INDEX);
+        userModel = new UserModel();
+        playlistModel = new PlaylistModel();
         if (songs != null) {
             Log.e(TAG, "onCreateView: songs size receive: " + songs.size());
         }
@@ -153,6 +165,7 @@ public class PlayerFragment extends Fragment {
         seekBar = view.findViewById(R.id.seek_bar);
 
         initUI();
+        checkSongAddedToFavorite();
         handleBackAction();
         handleActions();
     }
@@ -176,10 +189,150 @@ public class PlayerFragment extends Fragment {
             }
         });
 
+//        handle button previous
         btnPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendBroadcastToService(SongService.ACTION_PREVIOUS);
+            }
+        });
+
+        btnLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "onClick: button like song clieked " + isLike);
+                if (isLike) {
+                    btnLike.setImageResource(R.drawable.baseline_favorite_border_24);
+                    isLike = false;
+                    removeSongFromFavorite();
+                } else {
+                    btnLike.setImageResource(R.drawable.baseline_favorite_24);
+                    isLike = true;
+                    addSongToFavorite();
+                }
+            }
+
+            private void removeSongFromFavorite() {
+                String userId = userModel.getCurrentUser();
+                if (userId == null) {
+                    SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                }
+                String finalUserId = userId;
+
+                userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                    @Override
+                    public void onCompleted(List<Map<String, Object>> config) {
+                        if (config == null) {
+                            config = new ArrayList<>();
+                        }
+
+                        if (config.size() == 0) {
+                            return;
+                        } else {
+                            for (int i = 0; i < config.size(); i++) {
+                                if (config.get(i).get("songId").equals(song.getId())) {
+                                    config.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        userModel.updateConfig(finalUserId, Schema.FAVORITE_SONGS, config, new UserModel.onAddConfigListener() {
+                            @Override
+                            public void onCompleted() {
+                                Log.e(TAG, "onCompleted: remove config completed");
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Log.e(TAG, "onFailure: remove config failed");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Log.e(TAG, "onFailure: get config failed");
+                    }
+                });
+            }
+
+            private void addSongToFavorite() {
+                String userId = userModel.getCurrentUser();
+                if (userId == null) {
+                    SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                }
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("songId", song.getId());
+                data.put("songName", song.getName());
+                String finalUserId = userId;
+                userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                    @Override
+                    public void onCompleted(List<Map<String, Object>> config) {
+                        if (config == null) {
+                            config = new ArrayList<>();
+                        }
+
+                        if (config.size() == 0) {
+                            config.add(data);
+                        } else {
+                            for (int i = 0; i < config.size(); i++) {
+                                String songId = (String) config.get(i).get("songId");
+                                if (songId.equals(song.getId())) {
+                                    config.remove(i);
+                                    break;
+                                }
+                            }
+                            config.add(data);
+                        }
+
+                        userModel.updateConfig(finalUserId, Schema.FAVORITE_SONGS, config, new UserModel.onAddConfigListener() {
+                            @Override
+                            public void onCompleted() {
+                                Log.e(TAG, "onCompleted: config update completed");
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Log.e(TAG, "onFailure: error");
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Log.e(TAG, "onFailure: error");
+                    }
+                });
+            }
+        });
+    }
+
+    public void checkSongAddedToFavorite() {
+        String userId = userModel.getCurrentUser();
+        userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(List<Map<String, Object>> config) {
+                if (config != null) {
+                    for (Map<String, Object> map : config) {
+                        String songId = (String) map.get("songId");
+                        if (songId.equals(song.getId())) {
+                            btnLike.setImageResource(R.drawable.baseline_favorite_24);
+                            isLike = true;
+                            break;
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onCompleted: config null");
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.e(TAG, "onFailure: errror");
             }
         });
     }
@@ -189,11 +342,13 @@ public class PlayerFragment extends Fragment {
             case SongService.ACTION_START:
             case SongService.ACTION_PLAY:
             case SongService.ACTION_PAUSE:
-            case SongService.ACTION_RESUME:{
+            case SongService.ACTION_RESUME: {
                 updateStatusUI();
                 break;
             }
-            case SongService.ACTION_NEXT:{
+            case SongService.ACTION_NEXT:
+            case SongService.ACTION_PREVIOUS: {
+                isLike = false;
                 updateStatusUI();
                 initUI();
                 break;
@@ -206,7 +361,6 @@ public class PlayerFragment extends Fragment {
         if (song != null && activity != null) {
             tvSongName.setText(song.getName());
             tvSongAtistName.setText(song.getArtistName());
-
         }
     }
 
@@ -215,6 +369,13 @@ public class PlayerFragment extends Fragment {
             btnPlay.setImageResource(R.drawable.baseline_pause_24);
         } else {
             btnPlay.setImageResource(R.drawable.baseline_play_arrow_24);
+        }
+
+        checkSongAddedToFavorite();
+        if (isLike) {
+            btnLike.setImageResource(R.drawable.baseline_favorite_24);
+        } else {
+            btnLike.setImageResource(R.drawable.baseline_favorite_border_24);
         }
     }
 
@@ -269,6 +430,7 @@ public class PlayerFragment extends Fragment {
         intent.putExtras(bundle);
         getActivity().startService(intent);
     }
+
     private String durationToString(int duration) {
         int minutes = duration / 60;
         int seconds = duration % 60;

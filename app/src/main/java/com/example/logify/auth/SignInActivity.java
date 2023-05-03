@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.logify.MainActivity;
 import com.example.logify.R;
 import com.example.logify.entities.User;
+import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -124,7 +125,6 @@ public class SignInActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         uuid = sharedPreferences.getString("uuid", "");
-
     }
 
     private void handleLogin() {
@@ -236,6 +236,8 @@ public class SignInActivity extends AppCompatActivity {
 
                         Log.e(TAG, "firebaseAuthWithGoogle: user " + user.getDisplayName());
                         userModel.addUserWithGoogle(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl());
+
+
                         Intent intent = new Intent(SignInActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();

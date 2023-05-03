@@ -305,31 +305,39 @@ public class UserModel extends Model{
     }
 
     public void getConfig(String userId, String key, onGetConfigListener listener) {
+        if (userId == null || key == null) {
+            listener.onFailure();
+            return;
+        }
         Query query = database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(key);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Object values = snapshot.getValue();
-                    List<Map<String, Object>> list = new ArrayList<>();
-                    if (values instanceof List) {
-                        for (Object object : (List) values) {
-                            if (object instanceof Map) {
-                                list.add((Map<String, Object>) object);
+        if (query != null) {
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Object values = snapshot.getValue();
+                        List<Map<String, Object>> list = new ArrayList<>();
+                        if (values instanceof List) {
+                            for (Object object : (List) values) {
+                                if (object instanceof Map) {
+                                    list.add((Map<String, Object>) object);
+                                }
                             }
                         }
+                        listener.onCompleted(list);
+                    } else {
+                        listener.onCompleted(null);
                     }
-                    listener.onCompleted(list);
-                } else {
-                    listener.onCompleted(null);
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "onCancelled: error occur " + error.toString());
-                listener.onFailure();
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "onCancelled: error occur " + error.toString());
+                    listener.onFailure();
+                }
+            });
+        } else {
+            listener.onCompleted(null);
+        }
     }
 }

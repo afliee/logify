@@ -9,4 +9,10 @@ public class Schema {
     public static final String TOPICS = "topics";
     public static final String FAVORITE_ALBUMS = "favoriteAlbums";
     public static final String FAVORITE_SONGS = "favoriteSongs";
+
+    public enum PlaylistType {
+        ID,
+        NAME,
+        DESCRIPTION,
+    }
 }

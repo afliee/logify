@@ -11,6 +11,13 @@ import com.example.logify.entities.Song;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +26,10 @@ import java.util.Map;
 
 public class PlaylistModel extends Model{
     private static final String TAG = "PlaylistModel";
-
+    public interface OnFindPlaylistListener {
+        void onPlaylistFound(ArrayList<Song> songs);
+        void onPlaylistNotExists();
+    }
     public PlaylistModel() {
         super();
     }
@@ -59,14 +69,38 @@ public class PlaylistModel extends Model{
         });
     }
 
-    public void addSongFavorite(String userId, Song song) {
+    public void addSongFavorite(String userId, String playlistId, Song song) {
         Map<String, Object> songMap = song.toMap();
-        database.child(Schema.PLAYLISTS).child(userId).child(App.SONGS_ARG).setValue(songMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+        Query query = database.child(Schema.PLAYLISTS).child(userId).child(Schema.FAVORITE_SONGS).child(playlistId);
+
+        query.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Log.e(TAG, "onComplete: add song favorite successfull" );
-                if (task.isSuccessful()) {
-                    database.child(Schema.USERS).child(userId).child(Schema.FAVORITE_SONGS).child(song.getId()).setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Object songs = snapshot.getValue();
+                    if (songs instanceof List) {
+                        List<Map<String, Object>> songList = (List<Map<String, Object>>) songs;
+                        if (!songList.contains(songMap)) {
+                            songList.add(songMap);
+                            database.child(Schema.PLAYLISTS).child(userId).child(Schema.FAVORITE_SONGS).child(playlistId).setValue(songList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    Log.e(TAG, "onComplete: add song favorite successfull" );
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(TAG,"onFailure: " + e.toString());
+                                }
+                            });
+                        } else {
+                            Log.e(TAG, "onDataChange: song already exists");
+                        }
+                    }
+                } else {
+                    List<Map<String, Object>> songList = new ArrayList<>();
+                    songList.add(songMap);
+                    database.child(Schema.PLAYLISTS).child(userId).child(Schema.FAVORITE_SONGS).child(playlistId).setValue(songList).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             Log.e(TAG, "onComplete: add song favorite successfull" );
@@ -79,10 +113,46 @@ public class PlaylistModel extends Model{
                     });
                 }
             }
-        }).addOnFailureListener(new OnFailureListener() {
+
             @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG,"onFailure: " + e.toString());
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: erorr");
+            }
+        });
+    }
+
+    public void findPrivatePlaylist(String userId, String playlistId, OnFindPlaylistListener listener) {
+        Query query = database.child(Schema.PLAYLISTS).child(userId).child(Schema.FAVORITE_SONGS).child(playlistId);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    Object songs = snapshot.getValue();
+                    if(songs instanceof List) {
+                        JSONArray jsonArray = new JSONArray((List) songs);
+                        ArrayList<Song> songArrayList = new ArrayList<>();
+                        if (jsonArray != null) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                Song song = new Song();
+                                JSONObject jsonObject = jsonArray.optJSONObject(i);
+                            }
+                        }
+//                        List<Map<String, Object>> songList = (List<Map<String, Object>>) songs;
+//                        ArrayList<Song> songArrayList = new ArrayList<>();
+////                        for(Map<String, Object> songMap : songList) {
+////                            Song song = new Song(songMap);
+////                            songArrayList.add(song);
+////                        }
+//                        listener.onPlaylistFound(songArrayList);
+                    }
+                } else {
+                    listener.onPlaylistNotExists();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: erorr");
             }
         });
     }

@@ -2,6 +2,8 @@ package com.example.logify.entities;
 
 import android.net.Uri;
 
+import com.example.logify.constants.App;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -116,6 +118,7 @@ public class User {
             result.put("playlistId", playlistId);
             result.put("avatar", avatar.toString());
         }
+
         return result;
     }
 

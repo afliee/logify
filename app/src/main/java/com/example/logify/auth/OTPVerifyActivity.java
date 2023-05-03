@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.example.logify.MainActivity;
 import com.example.logify.R;
 import com.example.logify.entities.User;
+import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -216,6 +217,8 @@ public class OTPVerifyActivity extends AppCompatActivity {
                             editor.apply();
                             Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
                             intent.putExtra("username", username);
+
+
                             startActivity(intent);
                             finish();
                         } else {

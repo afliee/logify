@@ -1,6 +1,7 @@
 package com.example.logify.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,12 +16,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.logify.R;
+import com.example.logify.constants.App;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Topic;
 import com.example.logify.entities.User;
 import com.example.logify.fragments.ViewAlbumFragment;
 import com.example.logify.models.AlbumModel;
 import com.example.logify.models.UserModel;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +92,13 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
                         data.put("albumId", album.getId());
                         data.put("albumName", album.getName());
                         String userId = userModel.getCurrentUser();
-                        String key = "recentlyPlayed";
+                        if (userId == null) {
+                            SharedPreferences sharedPreferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+                            userId = sharedPreferences.getString("userId", null);
+                        }
+                        String key = App.CONFIG_RECENTLY_PLAYLED;
+                        Log.e(TAG, "onAlbumFound: userid: " + userId);
+                        String finalUserId = userId;
                         userModel.getConfig(userId, key, new UserModel.onGetConfigListener() {
                             @Override
                             public void onCompleted(List<Map<String, Object>> config) {
@@ -109,7 +118,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
                                     config.add(0, data);
                                 }
 
-                                userModel.updateConfig(userId, key, config, new UserModel.onAddConfigListener() {
+                                userModel.updateConfig(finalUserId, key, config, new UserModel.onAddConfigListener() {
                                     @Override
                                     public void onCompleted() {
                                         AppCompatActivity activity = (AppCompatActivity) context;
@@ -132,7 +141,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
 
                             @Override
                             public void onFailure() {
-
+                                Log.e(TAG, "onFailure: erorr " + album.getName());
                             }
                         });
 //                        userModel.updateConfig(userId, key, data, new UserModel.onAddConfigListener() {
