@@ -2,6 +2,7 @@ package com.example.logify.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -27,9 +28,12 @@ import com.example.logify.R;
 import com.example.logify.adapters.AlbumAdapter;
 import com.example.logify.adapters.RecentlyPlayedAdapter;
 import com.example.logify.adapters.TopicAdapter;
+import com.example.logify.constants.App;
 import com.example.logify.entities.Album;
+import com.example.logify.entities.Song;
 import com.example.logify.entities.Topic;
 import com.example.logify.models.AlbumModel;
+import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.TopicModel;
 import com.example.logify.models.UserModel;
 
@@ -53,6 +57,7 @@ public class HomeFragment extends Fragment {
     private ProgressBar loader;
     private UserModel userModel = new UserModel();
     private AlbumModel albumModel = new AlbumModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -176,6 +181,22 @@ public class HomeFragment extends Fragment {
             @Override
             public void onAlbumNotExist() {
                 Log.e(TAG, "onAlbumNotExist: album not found");
+            }
+        });
+        String userId = userModel.getCurrentUser();
+        if (userId == null) {
+            SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+        }
+        playlistModel.findPrivatePlaylist(userId, userId, new PlaylistModel.OnFindPlaylistListener() {
+            @Override
+            public void onPlaylistFound(ArrayList<Song> songs) {
+                Log.e(TAG, "onPlaylistFound: " + songs.toString());
+            }
+
+            @Override
+            public void onPlaylistNotExists() {
+                Log.e(TAG, "onPlaylistNotExists: playlist not found");
             }
         });
     }

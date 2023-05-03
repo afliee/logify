@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Song implements Serializable {
     private String id;
@@ -149,6 +150,20 @@ public class Song implements Serializable {
 
         return result;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Song)) return false;
+        Song song = (Song) o;
+        return id.equals(song.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     @Override
     public String toString() {
         return "Song{" +

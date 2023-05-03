@@ -242,6 +242,17 @@ public class PlayerFragment extends Fragment {
                             @Override
                             public void onCompleted() {
                                 Log.e(TAG, "onCompleted: remove config completed");
+                                playlistModel.removeSongFavorite(finalUserId, finalUserId, song, new PlaylistModel.OnPlaylistRemoveListener() {
+                                    @Override
+                                    public void onPlaylistRemoved() {
+                                        Log.e(TAG, "onPlaylistRemoved: remove song from favorite completed");
+                                    }
+
+                                    @Override
+                                    public void onPlaylistRemoveFailed() {
+                                        Log.e(TAG, "onPlaylistRemoveFailed: remove song from favorite failed");
+                                    }
+                                });
                             }
 
                             @Override
@@ -292,6 +303,18 @@ public class PlayerFragment extends Fragment {
                             @Override
                             public void onCompleted() {
                                 Log.e(TAG, "onCompleted: config update completed");
+                                playlistModel.addSongFavorite(finalUserId, finalUserId, song, new PlaylistModel.OnPlaylistAddListener() {
+                                    @Override
+                                    public void onPlaylistAdded() {
+                                        Log.e(TAG, "onPlaylistAdded: add song to favorite playlist completed");
+                                    }
+
+                                    @Override
+                                    public void onPlaylistAddFailed() {
+                                        Log.e(TAG, "onPlaylistAddFailed: add song to favorite playlist failed");
+                                    }
+                                });
+
                             }
 
                             @Override
@@ -299,7 +322,6 @@ public class PlayerFragment extends Fragment {
                                 Log.e(TAG, "onFailure: error");
                             }
                         });
-
                     }
 
                     @Override

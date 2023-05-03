@@ -15,6 +15,6 @@ public class Schema {
         public static final String NAME = "name";
         public static final String DESCRIPTION = "description";
         public static final String DURATION = "duration";
-        public static final String IMAGE = "image";
+        public static final String IMAGE = "imageResource";
     }
 }
