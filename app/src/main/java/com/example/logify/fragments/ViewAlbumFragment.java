@@ -232,15 +232,26 @@ public class ViewAlbumFragment extends Fragment {
 //        blur album layout with glide
 
         if (activity != null) {
-            Glide.with(activity)
-                    .load(album.getImage())
-                    .apply(RequestOptions.bitmapTransform(new BlurTransformation(context, 25, 1)))
-                    .into(blurImageBackground);
+            if (album.getImage().isEmpty()) {
+                Glide.with(activity)
+                        .load(R.drawable.default_playlist)
+                        .apply(RequestOptions.bitmapTransform(new BlurTransformation(context, 25, 1)))
+                        .into(blurImageBackground);
+                Glide.with(activity)
+                        .load(R.drawable.default_playlist)
+                        .into(imgAlbumCover);
 
-            Glide.with(activity)
-                    .load(album.getImage())
-                    .into(imgAlbumCover);
+            } else {
+                Glide.with(activity)
+                        .load(album.getImage())
+                        .apply(RequestOptions.bitmapTransform(new BlurTransformation(context, 25, 1)))
+                        .into(blurImageBackground);
 
+                Glide.with(activity)
+                        .load(album.getImage())
+                        .into(imgAlbumCover);
+            }
+            
             tvAlbumTitle.setText(album.getName());
             tvSortDescription.setText(album.getDescription());
             tvAlbumArtist.setText("Logify are ur friends");

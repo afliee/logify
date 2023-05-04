@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +23,7 @@ import com.example.logify.adapters.LibraryPlaylistAdapter;
 import com.example.logify.adapters.SearchSuggestAdapter;
 import com.example.logify.adapters.SongAdapter;
 import com.example.logify.constants.App;
+import com.example.logify.entities.Album;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
 import com.example.logify.entities.Song;
@@ -40,6 +44,7 @@ public class LibraryFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String TAG = "LibraryFragment";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -108,13 +113,40 @@ public class LibraryFragment extends Fragment {
             userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
         }
 
+        String finalUserId = userId;
         playlistModel.getPrivatePlaylist(userId, new PlaylistModel.OnGetPlaylistListener() {
             @Override
             public void onGetPlaylist(ArrayList<Playlist> playlists) {
                 LibraryPlaylistAdapter adapter = new LibraryPlaylistAdapter(getContext());
                 adapter.setPlaylists(playlists);
                 rcvPlaylist.setAdapter(adapter);
-                
+
+                adapter.setOnItemClickListener(new LibraryPlaylistAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Playlist playlist) {
+                        Log.e(TAG, "onItemClick: playlist " + playlist.getPlaylistName() + " clicked");
+                        playlistModel.getPrivateSpecificPlaylist(finalUserId, playlist.getId(), new PlaylistModel.OnGetSpecificPlaylistListener() {
+                            @Override
+                            public void onGetSpecificPlaylist(Album album) {
+                                Log.e(TAG, "onGetSpecificPlaylist: " + album.toString());
+                                AppCompatActivity activity = (AppCompatActivity) getContext();
+                                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("album", album);
+                                ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                                viewAlbumFragment.setArguments(bundle);
+                                fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+                                fragmentTransaction.addToBackStack(null);
+                                fragmentTransaction.commit();
+                            }
+
+                            @Override
+                            public void onGetSpecificPlaylistFailed() {
+                                Log.e(TAG, "onGetSpecificPlaylistFailed: failt to get private specific of playlist by " + finalUserId );
+                            }
+                        });
+                    }
+                });
             }
 
             @Override

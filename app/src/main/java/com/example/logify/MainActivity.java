@@ -33,6 +33,7 @@ import com.example.logify.auth.SignInActivity;
 import com.example.logify.constants.App;
 import com.example.logify.constants.Schema;
 import com.example.logify.entities.Song;
+import com.example.logify.entities.User;
 import com.example.logify.fragments.AboutUsFragment;
 import com.example.logify.fragments.HomeFragment;
 import com.example.logify.fragments.LibraryFragment;
@@ -189,8 +190,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         handleBottomBehavior();
+        updateProfile();
+    }
 
-
+    private void updateProfile() {
+        String userId = mAuth.getCurrentUser().getUid();
+        if (userId != null) {
+            userModel.getUser(userId, new UserModel.UserCallBacks() {
+                @Override
+                public void onCallback(User user) {
+                    if (user != null) {
+                        View headerView = ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0);
+                        TextView navUsername = headerView.findViewById(R.id.nav_name);
+                        TextView navEmail = headerView.findViewById(R.id.nav_email);
+                        navUsername.setText(user.getUsername());
+                        if (user.getPhoneNumber().isEmpty()) {
+                            navEmail.setText(user.getEmail());
+                        } else {
+                            navEmail.setText(user.getPhoneNumber());
+                        }
+                    }
+                }
+            });
+        }
     }
 
     @Override

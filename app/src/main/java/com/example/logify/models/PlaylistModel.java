@@ -61,6 +61,12 @@ public class PlaylistModel extends Model {
 
         void onGetPublicPlaylistFailed();
     }
+
+    public interface OnGetSpecificPlaylistListener {
+        void onGetSpecificPlaylist(Album album);
+
+        void onGetSpecificPlaylistFailed();
+    }
     public PlaylistModel() {
         super();
     }
@@ -386,6 +392,88 @@ public class PlaylistModel extends Model {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 listener.onGetPublicPlaylistFailed();
+            }
+        });
+    }
+
+    public void getPrivateSpecificPlaylist(String userId, String playlistId, OnGetSpecificPlaylistListener listener) {
+        Query query = database.child(Schema.PLAYLISTS).child(userId).child(playlistId);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Album album = new Album();
+                    Object value = snapshot.getValue();
+                    if (value instanceof Map) {
+                        JSONObject playlist = new JSONObject((Map) value);
+                        String id = playlist.optString(Schema.PlaylistType.ID);
+                        String name = playlist.optString(Schema.PlaylistType.NAME);
+                        String image = playlist.optString(Schema.PlaylistType.IMAGE);
+                        String description = playlist.optString(Schema.PlaylistType.DESCRIPTION);
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                        JSONObject favoriteSongs = playlist.optJSONObject(Schema.PlaylistType.SONGS);
+                        ArrayList<String> artistContributor = new ArrayList<>();
+
+                        if (favoriteSongs != null) {
+                            ArrayList<Song> songs = new ArrayList<>();
+                            Iterator<String> iterator = favoriteSongs.keys();
+                            while (iterator.hasNext()) {
+                                String key = iterator.next();
+                                JSONObject songObject = favoriteSongs.optJSONObject(key);
+                                String songId = songObject.optString(Schema.SongType.ID);
+                                String songName = songObject.optString(Schema.SongType.NAME);
+
+                                int releaseDate = songObject.optInt("releaseDate");
+                                String releaseDateStr = dateFormat.format(releaseDate);
+
+                                String artistName = songObject.optString("artistName");
+
+                                JSONArray artistsIdArray = songObject.optJSONArray("artistsId");
+
+                                int duration = songObject.optInt("duration");
+
+                                String thumbnail = songObject.optString("imageResource");
+
+                                ArrayList<String> artistIds = new ArrayList<>();
+                                ArrayList<String> artistNames = new ArrayList<>();
+
+                                if (artistsIdArray != null) {
+                                    for (int j = 0; j < artistsIdArray.length(); j++) {
+                                        String artistId = artistsIdArray.optString(j);
+                                        artistIds.add(artistId);
+                                    }
+                                }
+
+                                ArrayList<String> genres = new ArrayList<>();
+                                JSONArray genresArray = songObject.optJSONArray("genres");
+                                for (int j = 0; j < genresArray.length(); j++) {
+                                    String genre = genresArray.optString(j);
+                                    genres.add(genre);
+                                }
+
+                                Song song = new Song(songId, songName, artistIds, artistNames, thumbnail, "Unknown", releaseDateStr, artistName, duration, genres);
+                                songs.add(song);
+                            }
+                            if (songs.size() > 0) {
+                                album.setSongs(songs);
+                                album.setArtistIds(artistContributor);
+                            }
+                        }
+                        album.setName(name);
+                        album.setId(id);
+                        album.setImage(image);
+                        album.setDescription(description);
+                        listener.onGetSpecificPlaylist(album);
+                    }
+                } else {
+                    listener.onGetSpecificPlaylistFailed();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }

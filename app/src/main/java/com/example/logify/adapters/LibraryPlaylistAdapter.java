@@ -17,9 +17,14 @@ import com.example.logify.entities.Playlist;
 
 import java.util.ArrayList;
 
-public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter{
+public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter <RecyclerView.ViewHolder>{
     private Context context;
     private ArrayList<Playlist> playlists;
+    public interface OnItemClickListener {
+        void onItemClick(Playlist playlist);
+    }
+
+    private OnItemClickListener listener;
 
     public LibraryPlaylistAdapter(Context context) {
         this.context = context;
@@ -33,6 +38,10 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter{
     public void setPlaylists(ArrayList<Playlist> playlists) {
         this.playlists = playlists;
         notifyDataSetChanged();
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -62,7 +71,7 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter{
         return playlists == null ? 0 : playlists.size();
     }
 
-    private class LibraryPlaylistViewHolder extends RecyclerView.ViewHolder {
+    private class LibraryPlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imvPlaylist;
         private TextView tvPlaylistName;
         private TextView tvTitle;
@@ -73,6 +82,14 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter{
             tvPlaylistName = itemView.findViewById(R.id.tvPlaylistName);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             libPlaylistItem = itemView.findViewById(R.id.libPlaylistItem);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Playlist playlist = playlists.get(position);
+            listener.onItemClick(playlist);
         }
     }
 }
