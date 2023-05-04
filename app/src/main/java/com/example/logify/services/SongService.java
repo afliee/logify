@@ -61,6 +61,7 @@ public class SongService extends Service {
     public static final int ACTION_SHUFFLE = 10;
     public static final int ACTION_REPEAT = 11;
     public static final int ACTION_SONG_LIKED = 12;
+    public static final int ACTION_SEEK_TO = 13;
 
     private Song song;
     private ArrayList<Song> songs;
@@ -70,6 +71,7 @@ public class SongService extends Service {
     private boolean isNowPlaying = false;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
+    private int seekTo = 0;
     private SongModel songModel = new SongModel();
 
     public SongService() {
@@ -112,8 +114,9 @@ public class SongService extends Service {
                 isNowPlaying = bundle.getBoolean(App.IN_NOW_PLAYING);
                 isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
                 isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
+                seekTo = bundle.getInt(App.SEEK_BAR_PROGRESS, 0);
                 song = songs.get(songIndex);
-                Log.e(TAG, "onStartCommand: hadnle " + songIndex + " " + song.toString());
+                Log.e(TAG, "onStartCommand: hadnle " + songIndex + " " + song.toString() + "; isShuffle: " + isShuffle + " ; isRepeat: " + isRepeat + "; seekto: " + seekTo);
 //                play();
 //                sendNotification();
             }
@@ -286,11 +289,32 @@ public class SongService extends Service {
             case ACTION_SONG_LIKED:
                 songLiked();
                 break;
+            case ACTION_SEEK_TO:
+                seekTo();
+                break;
             case ACTION_CLOSE:
                 stopSelf();
                 sendBroadcastToActivity(ACTION_CLOSE);
                 break;
 
+        }
+    }
+
+    private void seekTo() {
+        if (mediaPlayer != null) {
+            Log.e(TAG, "seekTo: seek to : " + seekTo);
+//            seek to specific position
+            int lenght = mediaPlayer.getCurrentPosition();
+            mediaPlayer.seekTo(seekTo * 1000L, MediaPlayer.SEEK_CLOSEST);
+            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                @Override
+                public void onSeekComplete(MediaPlayer mp) {
+                    Log.e(TAG, "onSeekComplete: seek to : " + mp.getCurrentPosition());
+                    mp.start();
+                    isPlaying = true;
+                    sendBroadcastToActivity(ACTION_SEEK_TO);
+                }
+            });
         }
     }
 
@@ -313,6 +337,7 @@ public class SongService extends Service {
             mediaPlayer.seekTo(lenght);
             mediaPlayer.start();
             isPlaying = true;
+            sendNotification();
             sendBroadcastToActivity(ACTION_RESUME);
         } else {
             Log.e(TAG, "resume: with conditions : " + mediaPlayer + " " + isPlaying);
@@ -324,7 +349,7 @@ public class SongService extends Service {
     }
 
     private void previous() {
-        Toast.makeText(this, "Previous button clicked", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Previous button clicked", Toast.LENGTH_SHORT).show();
         if (songIndex > 0) {
             songIndex--;
         } else {
@@ -336,7 +361,8 @@ public class SongService extends Service {
     }
 
     private void next() {
-        Toast.makeText(this, "Next button clicked", Toast.LENGTH_SHORT).show();
+        seekTo = 0;
+//        Toast.makeText(this, "Next button clicked", Toast.LENGTH_SHORT).show();
         if (isShuffle) {
             songIndex = new Random().nextInt(songs.size());
         }
@@ -374,6 +400,7 @@ public class SongService extends Service {
         bundle.putSerializable(App.SONGS_ARG, songs);
         bundle.putBoolean(App.IS_PLAYING, isPlaying);
         bundle.putInt(App.SONG_INDEX, songIndex);
+        bundle.putInt(App.SEEK_BAR_PROGRESS, mediaPlayer.getCurrentPosition() / 1000);
         bundle.putBoolean(App.IN_NOW_PLAYING, isNowPlaying);
         bundle.putInt(App.ACTION_TYPE, action);
         bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
