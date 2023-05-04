@@ -99,15 +99,13 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 Album album = (Album) SearchResultAdapter.this.items.get(position);
                 ViewHolderPlaylist viewHolder1 = (ViewHolderPlaylist) holder;
                 viewHolder1.tvPlaylistName.setText(album.getName());
-                String albumName = album.getName().isEmpty() ? "Album" : album.getName();
-                viewHolder1.tvTitle.setText(albumName);
                 Glide.with(context).load(album.getImage()).into(viewHolder1.imvPlaylist);
                 break;
             case TYPE_VIEW2:
                 Artist artist = (Artist) SearchResultAdapter.this.items.get(position);
                 SearchResultAdapter.ViewHolderArtist viewHolder2 = (SearchResultAdapter.ViewHolderArtist) holder;
                 viewHolder2.tvArtistName.setText(artist.getName());
-                String artistName = artist.getName().isEmpty() ? "Artist" : artist.getName();
+                String artistName = artist.getCreatedDate().isEmpty() ? "Artist" : artist.getName();
                 viewHolder2.tvTitle.setText(artistName);
                 Glide.with(context).load(artist.getImage()).into(viewHolder2.imvLibraryArtist);
                 break;
@@ -140,7 +138,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             imvPlaylist = itemView.findViewById(R.id.imvPlaylist);
             tvPlaylistName = itemView.findViewById(R.id.tvPlaylistName);
             tvTitle = itemView.findViewById(R.id.tvTitle);
-//            tvTitle.setText("Playlist");
+            tvTitle.setText("Album");
             libPlaylistItem = itemView.findViewById(R.id.libPlaylistItem);
             itemView.setOnClickListener(this);
         }
