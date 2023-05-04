@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -23,7 +24,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.logify.R;
-import com.example.logify.adapters.LibraryArtistAdapter;
 import com.example.logify.adapters.SearchResultAdapter;
 import com.example.logify.adapters.SearchSuggestAdapter;
 import com.example.logify.entities.Album;
@@ -31,6 +31,7 @@ import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
 import com.example.logify.entities.Song;
 import com.example.logify.entities.User;
+import com.example.logify.models.AlbumModel;
 import com.example.logify.models.ArtistModel;
 import com.example.logify.models.PlaylistModel;
 
@@ -53,10 +54,12 @@ public class SearchFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private PlaylistModel playlistModel = new PlaylistModel();
-    private ArtistModel artistModel = new ArtistModel();
+    private final ArtistModel artistModel = new ArtistModel();
+    private final AlbumModel albumModel = new AlbumModel();
     RecyclerView rcvSearchSuggestItems;
     private RecyclerView rcvResult;
     EditText edtSearch;
+    private String key;
 
 
     // TODO: Rename and change types of parameters
@@ -109,7 +112,7 @@ public class SearchFragment extends Fragment {
                         || i == EditorInfo.IME_ACTION_DONE
                         || keyEvent.getAction() == KeyEvent.ACTION_DOWN
                         && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                    Log.d("SEARCH KEY", "onEditorAction: " + edtSearch.getText().toString());
+                    Log.d(TAG, "onEditorAction: " + edtSearch.getText().toString());
 
                     //hide keyboard after user click to search
                     InputMethodManager imm = (InputMethodManager)textView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -142,23 +145,25 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d("SEARCH KEY", "onEditorAction: " + edtSearch.getText().toString());
+                Log.d(TAG, "onEditorAction: " + edtSearch.getText().toString());
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if(edtSearch.getText().toString().equals("")) {
+                key = edtSearch.getText().toString().trim();
+                if(edtSearch.getText().toString().trim().equals("")) {
                     rcvSearchSuggestItems.setVisibility(View.VISIBLE);
                 } else {
                     rcvSearchSuggestItems.setVisibility(View.GONE);
                 }
+                getSearchResult();
             }
         });
 
 //        set search result
         rcvResult = convertView.findViewById(R.id.rcvSearchResult);
         rcvResult.setVisibility(View.GONE);
-        getSearchResult();
+//        getSearchResult();
 
         return convertView;
     }
@@ -228,35 +233,91 @@ public class SearchFragment extends Fragment {
         ArrayList<Object> playlists = new ArrayList<>();
         ArrayList<Object> artists = new ArrayList<>();
         ArrayList<Object> songs = new ArrayList<>();
+        SearchResultAdapter adapter = new SearchResultAdapter(getContext());
+        ArrayList<Object> items = new ArrayList<>();
 
-        User user = new User(UUID.randomUUID().toString(), "username", "0111111111", "1111111");
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist1", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist2", "nothing", "https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2022%2F11%2Fsza-sos-album-cover-artwork-reveal-image-announcement-TW.jpg?w=960&cbr=1&q=90&fit=max", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist3", "nothing", "https://i.pinimg.com/564x/1e/1c/85/1e1c850adc6e2cefded8b64e7c41e51e.jpg", user.getUuid(), LocalTime.now().toString()));
+        rcvResult.setAdapter(adapter);
+        adapter.setItems(items);
 
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 1","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 2","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 3","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 4","notshing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        User user = new User(UUID.randomUUID().toString(), "username", "0111111111", "1111111");
+//        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist1", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
+//        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist2", "nothing", "https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2022%2F11%2Fsza-sos-album-cover-artwork-reveal-image-announcement-TW.jpg?w=960&cbr=1&q=90&fit=max", user.getUuid(), LocalTime.now().toString()));
+//        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist3", "nothing", "https://i.pinimg.com/564x/1e/1c/85/1e1c850adc6e2cefded8b64e7c41e51e.jpg", user.getUuid(), LocalTime.now().toString()));
 
-        songs.add(new Song(UUID.randomUUID().toString(), "song 1", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
-        songs.add(new Song(UUID.randomUUID().toString(), "song 2", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
-        songs.add(new Song(UUID.randomUUID().toString(), "song 3", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
-        songs.add(new Song(UUID.randomUUID().toString(), "song 4", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
-        songs.add(new Song(UUID.randomUUID().toString(), "song 5", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
+
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 1","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 2","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 3","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 4","notshing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+        artistModel.search(key, new ArtistModel.OnArtistSearchListener() {
+            @Override
+            public void onArtistSearchCompleted(ArrayList<Object> artists) {
+                Log.e(TAG, "onArtistSearchCompleted: " + key);
+                if (artists != null) {
+                    Log.e(TAG, "onArtistSearchCompleted: artist after search : " + artists.toString() );
+                    items.addAll(artists);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "onArtistSearchCompleted: artist after search : null" );
+                }
+            }
+        });
+        albumModel.search(key, new AlbumModel.OnSearchListener() {
+            @Override
+            public void onAlbumFound(ArrayList<Album> albums) {
+                if (albums != null) {
+                    Log.e(TAG, "onAlbumFound: " + albums.toString() );
+                    items.addAll(albums);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "onAlbumFound: null" );
+                }
+            }
+
+            @Override
+            public void onSongFound(ArrayList<Song> songs) {
+                if (songs != null) {
+                    Log.e(TAG, "onSongFound: " + songs.toString() );
+                    items.addAll(new ArrayList<>(songs.subList(0, Math.min(5, songs.size()))));
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "onSongFound: null" );
+                }
+            }
+
+            @Override
+            public void onNotExist() {
+                Log.e(TAG, "onNotExist: erorr occur in search fragment" );
+            }
+        });
+
+//        songs.add(new Song(UUID.randomUUID().toString(), "song 1", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
+//        songs.add(new Song(UUID.randomUUID().toString(), "song 2", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
+//        songs.add(new Song(UUID.randomUUID().toString(), "song 3", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
+//        songs.add(new Song(UUID.randomUUID().toString(), "song 4", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
+//        songs.add(new Song(UUID.randomUUID().toString(), "song 5", UUID.randomUUID().toString(), "https://www.udiscovermusic.com/wp-content/uploads/2018/09/Taylor-Swift-Red-album-cover-web-optimised-820-e1624321260711-820x820.jpg", "", LocalTime.now().toString()));
 
         RecyclerView.LayoutManager layoutManager;
 
         /*
         * add 3 arraylist to adapter
         * */
-        ArrayList<Object> items = new ArrayList<>();
-        items.addAll(playlists);
-        items.addAll(artists);
-        items.addAll(songs);
-        SearchResultAdapter adapter = new SearchResultAdapter(getContext(), items);
+//        items.addAll(playlists);
+//        items.addAll(artists);
+//        adapter.setItems(items);
+//        SearchResultAdapter adapter = new SearchResultAdapter(getContext(), items);
+        adapter.setItemOnClickListener(new SearchResultAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Object object, int position) {
+                if (object instanceof Album) {
+                    Album album =  (Album) object;
+                    Log.e(TAG, "onItemClick: clicked" + album.getName());
+
+                }
+            }
+        });
+
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         rcvResult.setLayoutManager(layoutManager);
-        rcvResult.setAdapter(adapter);
     }
 }

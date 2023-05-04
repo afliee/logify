@@ -9,6 +9,8 @@ import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 public class MainApplication extends Application {
     private static final String TAG = "MainApplication";
     public static final String CHANNEL_ID = "Logify";
@@ -16,7 +18,7 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         createNotificationChannel();
 
     }

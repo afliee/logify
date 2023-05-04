@@ -218,11 +218,13 @@ public class ViewAlbumFragment extends Fragment {
         ArrayList<String> artists = album.getArtistIds();
         ArrayList<Artist> artistArrayList = new ArrayList<>();
         ArrayList<String> artistNames = new ArrayList<>();
-        for (String artistId : artists) {
-            Artist artist = artistModel.getArtistById(artistId);
-            if (artist != null) {
-                artistArrayList.add(artist);
-                artistNames.add(artist.getName());
+        if (artists != null) {
+            for (String artistId : artists) {
+                Artist artist = artistModel.getArtistById(artistId);
+                if (artist != null) {
+                    artistArrayList.add(artist);
+                    artistNames.add(artist.getName());
+                }
             }
         }
 

@@ -29,7 +29,7 @@
         android:maxLines="1"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/menu_button"
+        app:layout_constraintEnd_toStartOf="@id/follow_button"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/image"
         app:layout_constraintTop_toTopOf="parent"
@@ -37,13 +37,13 @@
         tools:text="Blame" />
 
     <ImageView
-        android:id="@+id/menu_button"
+        android:id="@+id/follow_button"
         android:layout_width="74dp"
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/ic_more_horiz_24dp"
+        app:srcCompat="@drawable/baseline_favorite_border_24"
         android:padding="22dp"
         android:background="@drawable/ripple_effect"/>
 

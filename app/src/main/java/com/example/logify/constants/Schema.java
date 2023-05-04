@@ -9,6 +9,7 @@ public class Schema {
     public static final String TOPICS = "topics";
     public static final String FAVORITE_ALBUMS = "favoriteAlbums";
     public static final String FAVORITE_SONGS = "favoriteSongs";
+    public static final String FAVORITE_ARTISTS = "favoriteArtists";
 
     public static class SongType {
         public static final String ID = "id";
@@ -25,5 +26,12 @@ public class Schema {
         public static final String DESCRIPTION = "description";
         public static final String SONGS = "favoriteSongs";
         public static final String CREATED_DATE = "createdDate";
+    }
+
+    public static class ArtistType {
+        public static final String ID = "artistId";
+        public static final String NAME = "artistName";
+        public static final String IMAGE = "image";
+        public static final String PLAYLIST_ID = "playlistId";
     }
 }

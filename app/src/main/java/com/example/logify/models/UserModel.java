@@ -10,6 +10,7 @@ import com.example.logify.auth.ForgotPasswordActivity;
 import com.example.logify.auth.OTPVerifyActivity;
 import com.example.logify.constants.App;
 import com.example.logify.constants.Schema;
+import com.example.logify.entities.Artist;
 import com.example.logify.entities.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -23,6 +24,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -64,6 +68,11 @@ public class UserModel extends Model{
     public interface CheckUserExistCallBacks {
         void onExist();
         void onNotFound();
+    }
+
+    public interface OnGetArtistFavoriteListener {
+        void onCompleted(ArrayList<Artist> artist);
+        void onFailure();
     }
 
     public UserModel() {
@@ -327,6 +336,52 @@ public class UserModel extends Model{
                         listener.onCompleted(list);
                     } else {
                         listener.onCompleted(null);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "onCancelled: error occur " + error.toString());
+                    listener.onFailure();
+                }
+            });
+        } else {
+            listener.onCompleted(null);
+        }
+    }
+
+    public void getArtistIdsFavorite(String userId, OnGetArtistFavoriteListener listener) {
+        Query query = database.child(Schema.USERS).child(userId).child(App.CONFIGURATION).child(Schema.FAVORITE_ARTISTS);
+        if (query != null) {
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Object values = snapshot.getValue();
+                        if (values instanceof List) {
+                            JSONArray artists = new JSONArray((List) values);
+                            if (artists != null) {
+                                ArrayList<Artist> artistArrayList = new ArrayList<>();
+                                for (int i = 0; i < artists.length(); i++) {
+                                    JSONObject artist = artists.optJSONObject(i);
+                                    try {
+                                        String id = artist.getString(Schema.ArtistType.ID);
+                                        String name = artist.getString(Schema.ArtistType.NAME);
+                                        String image = artist.getString(Schema.ArtistType.IMAGE);
+                                        String playlistId = artist.getString(Schema.ArtistType.PLAYLIST_ID);
+
+                                        Artist artist1 = new Artist(id, name, image, playlistId);
+                                        artistArrayList.add(artist1);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                listener.onCompleted(artistArrayList);
+                            } else {
+                                listener.onCompleted(null);
+                            }
+                        }
                     }
                 }
 

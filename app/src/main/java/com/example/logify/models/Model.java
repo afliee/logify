@@ -19,6 +19,7 @@ public class Model {
     public Model() {
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
+        database.keepSynced(true);
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
     }

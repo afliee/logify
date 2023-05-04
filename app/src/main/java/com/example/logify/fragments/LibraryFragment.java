@@ -28,6 +28,7 @@ import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
 import com.example.logify.entities.Song;
 import com.example.logify.entities.User;
+import com.example.logify.models.ArtistModel;
 import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
 
@@ -55,7 +56,7 @@ public class LibraryFragment extends Fragment {
     private RecyclerView rcvArtist;
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final UserModel userModel = new UserModel();
-
+    private final ArtistModel artistModel = new ArtistModel();
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -158,23 +159,67 @@ public class LibraryFragment extends Fragment {
 
     public void initArtist() {
         RecyclerView.LayoutManager layoutManager;
-        LibraryArtistAdapter adapter;
+
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         rcvArtist.setLayoutManager(layoutManager);
 
         ArrayList<Artist> artists = new ArrayList<>();
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 1","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 2","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 3","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 4","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 5","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 6","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
-        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 7","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 1","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 2","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 3","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 4","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 5","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 6","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+//        artists.add(new Artist(UUID.randomUUID().toString(), "Artist 7","nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", LocalTime.now().toString()));
+        String userId = userModel.getCurrentUser();
+        if (userId == null) {
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+        }
+        if (userId != null) {
+            userModel.getArtistIdsFavorite(userId, new UserModel.OnGetArtistFavoriteListener() {
+                @Override
+                public void onCompleted(ArrayList<Artist> artist) {
+                    LibraryArtistAdapter adapter = new LibraryArtistAdapter(getContext());
+                    adapter.setArtists(artist);
+                    rcvArtist.setAdapter(adapter);
 
+                    adapter.setOnItemClickListener(new LibraryArtistAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(Artist artist) {
+                            playlistModel.getPublicPlaylist(artist.getPlaylistId(), new PlaylistModel.OnGetPublicPlaylistListener() {
+                                @Override
+                                public void onGetPublicPlaylist(Album album) {
+                                    album.setImage(artist.getImage());
+                                    album.setName(artist.getName());
+                                    Log.e(TAG, "onGetPublicPlaylist: album: " + album.toString());
+                                    AppCompatActivity activity = (AppCompatActivity) getContext();
+                                    FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                                    Bundle bundle = new Bundle();
+                                    bundle.putSerializable("album", album);
+                                    ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                                    viewAlbumFragment.setArguments(bundle);
+                                    fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+                                    fragmentTransaction.addToBackStack(null);
+                                    fragmentTransaction.commit();
+                                }
 
-        adapter = new LibraryArtistAdapter(getContext());
-        adapter.setArtists(artists);
-        rcvArtist.setAdapter(adapter);
+                                @Override
+                                public void onGetPublicPlaylistFailed() {
+                                    Log.e(TAG, "onGetPublicPlaylistFailed: erorr");
+                                }
+                            });
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+            });
+        }
+
     }
 
 }

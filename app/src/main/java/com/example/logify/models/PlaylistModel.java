@@ -19,6 +19,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
@@ -36,6 +37,11 @@ public class PlaylistModel extends Model {
         void onPlaylistFound(ArrayList<Song> songs);
 
         void onPlaylistNotExists();
+    }
+
+    public interface OnPlaylistSearchListener {
+        void onCompleted(ArrayList<Playlist> playlists);
+        void onFailed();
     }
 
     public interface OnPlaylistAddListener {
@@ -371,6 +377,9 @@ public class PlaylistModel extends Model {
                                     String genre = genresArray.optString(j);
                                     genres.add(genre);
                                 }
+                                if (url.isEmpty()) {
+                                    url = "Unknown";
+                                }
 
                                 Song song = new Song(id, name, artistIds, artistNames, thumbnail, url, releaseDateStr, artistName, duration, genres);
                                 songs.add(song);
@@ -477,4 +486,6 @@ public class PlaylistModel extends Model {
             }
         });
     }
+
+
 }
