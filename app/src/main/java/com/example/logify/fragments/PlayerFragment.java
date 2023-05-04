@@ -68,7 +68,7 @@ public class PlayerFragment extends Fragment {
     private int seekTo = 0;
     private UserModel userModel;
     private PlaylistModel playlistModel;
-    private Handler handler;
+    private Handler handler = new Handler();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -183,6 +183,7 @@ public class PlayerFragment extends Fragment {
         handleBackAction();
         handleActions();
         handleSeekbarChange();
+        updateCurrentDuration();
     }
 
     private void handleSeekbarChange() {
@@ -418,11 +419,17 @@ public class PlayerFragment extends Fragment {
     private void handleActionReceive(int action) {
         switch (action) {
             case SongService.ACTION_START:
-            case SongService.ACTION_PLAY:
+            case SongService.ACTION_PLAY: {
+                updateStatusUI();
+                updateSeekbarUI();
+                updateCurrentDuration();
+                break;
+            }
             case SongService.ACTION_RESUME:
             case SongService.ACTION_SEEK_TO: {
                 updateStatusUI();
                 updateSeekbarUI();
+                removeUpdateCurrentDuration();
                 updateCurrentDuration();
                 break;
             }
@@ -532,23 +539,26 @@ public class PlayerFragment extends Fragment {
         }
     }
 
-    private void updateCurrentDuration() {
-//        update current duration
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (isPlaying) {
-                    seekTo += 1;
-                    seekBar.setProgress(seekTo);
-                    tvSeekbarCurrentPosition.setText(durationToString(seekTo));
-                }
-                if (seekTo == song.getDuration()) {
-                    return;
-                }
+    private Runnable updateSeekbar = new Runnable() {
+        @Override
+        public void run() {
+            if (isPlaying) {
+                seekTo = seekTo + 1;
+                seekBar.setProgress(seekTo);
+                tvSeekbarCurrentPosition.setText(durationToString(seekTo));
                 handler.postDelayed(this, 1000);
             }
-        }, 1000);
+        }
+    };
+
+    private void updateCurrentDuration() {
+//        update current duration
+
+        handler.postDelayed(updateSeekbar, 1000);
+    }
+
+    private void removeUpdateCurrentDuration() {
+        handler.removeCallbacks(updateSeekbar);
     }
 
     private void sendBroadcastToService(int action) {
