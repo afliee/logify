@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.logify.auth.SignInActivity;
 import com.example.logify.constants.App;
+import com.example.logify.constants.Schema;
 import com.example.logify.entities.Song;
 import com.example.logify.fragments.AboutUsFragment;
 import com.example.logify.fragments.HomeFragment;
@@ -39,6 +40,8 @@ import com.example.logify.fragments.PlayerFragment;
 import com.example.logify.fragments.ProfileFragment;
 import com.example.logify.fragments.SearchFragment;
 import com.example.logify.fragments.SettingFragment;
+import com.example.logify.models.PlaylistModel;
+import com.example.logify.models.UserModel;
 import com.example.logify.services.SongService;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -48,13 +51,16 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_CODE = 1;
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
-    private ImageView btnPlayPause, btnNext;
+    private ImageView btnPlayPause, btnNext, btnLike;
     private FirebaseAuth mAuth;
     private CardView bottomCurrentSong;
     private ShapeableImageView albumArt;
@@ -62,9 +68,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Song currentSong;
     private ArrayList<Song> songs;
     private boolean isPlaying = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
+    private boolean isLike = false;
     private int songIndex;
     private int action;
     private boolean isNowPlaying = false;
+    private final UserModel userModel = new UserModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -75,14 +86,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 currentSong = (Song) bundle.getSerializable(App.CURRENT_SONG);
                 songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
                 songIndex = bundle.getInt(App.SONG_INDEX);
+
                 isPlaying = bundle.getBoolean(App.IS_PLAYING);
                 isNowPlaying = bundle.getBoolean(App.IN_NOW_PLAYING);
+                isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
+                isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
+
                 action = bundle.getInt(App.ACTION_TYPE);
-                Log.e(TAG, "onReceive: " + action + " " + currentSong.getName() + " " + isPlaying + " " + isNowPlaying);
+                Log.e(TAG, "onReceive: " + action + " " + currentSong.getName() + " isPlaying: " + isPlaying + "; isNowPlaying: " + isNowPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat);
                 if (songs != null) {
                     Log.e(TAG, "onReceive: songs size: " + songs.size());
                 } else {
-                    Log.e(TAG, "onReceive: songs is empty 🤏" );
+                    Log.e(TAG, "onReceive: songs is empty 🤏");
                 }
                 handleLayoutCurrentSong(action);
             }
@@ -106,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        bottom current song
         btnPlayPause = findViewById(R.id.play_pause);
         btnNext = findViewById(R.id.next);
+        btnLike = findViewById(R.id.heart);
 
         bottomCurrentSong = findViewById(R.id.bottom_current_song);
         albumArt = findViewById(R.id.album_art);
@@ -184,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handlePermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            String[] permissions = new String[] {
+            String[] permissions = new String[]{
                     Manifest.permission.POST_NOTIFICATIONS
             };
             if (ContextCompat.checkSelfPermission(this.getApplicationContext(), permissions[0]) != PackageManager.PERMISSION_GRANTED) {
@@ -237,6 +253,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bundle.putSerializable(App.SONGS_ARG, songs);
                 bundle.putInt(App.SONG_INDEX, songIndex);
                 bundle.putBoolean(App.IS_PLAYING, isPlaying);
+                bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
+                bundle.putBoolean(App.IS_REPEAT, isRepeat);
                 playerFragment.setArguments(bundle);
                 fragmentTransaction.replace(R.id.frame_layout, playerFragment);
                 fragmentTransaction.addToBackStack(null);
@@ -245,19 +263,154 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bottomCurrentSong.setVisibility(View.GONE);
             }
         });
+
+        btnLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "onClick: button like song clieked " + isLike);
+                if (isLike) {
+                    btnLike.setImageResource(R.drawable.baseline_favorite_border_24);
+                    isLike = false;
+                    removeSongFromFavorite();
+                } else {
+                    btnLike.setImageResource(R.drawable.baseline_favorite_24);
+                    isLike = true;
+                    addSongToFavorite();
+                }
+            }
+
+            private void removeSongFromFavorite() {
+                String userId = userModel.getCurrentUser();
+                if (userId == null) {
+                    SharedPreferences sharedPreferences = getSharedPreferences(App.SHARED_PREFERENCES_USER, MODE_PRIVATE);
+                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                }
+                String finalUserId = userId;
+
+                userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                    @Override
+                    public void onCompleted(List<Map<String, Object>> config) {
+                        if (config == null) {
+                            config = new ArrayList<>();
+                        }
+
+                        if (config.size() == 0) {
+                            return;
+                        } else {
+                            for (int i = 0; i < config.size(); i++) {
+                                if (config.get(i).get("songId").equals(currentSong.getId())) {
+                                    config.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        userModel.updateConfig(finalUserId, Schema.FAVORITE_SONGS, config, new UserModel.onAddConfigListener() {
+                            @Override
+                            public void onCompleted() {
+                                Log.e(TAG, "onCompleted: remove config completed");
+                                playlistModel.removeSongFavorite(finalUserId, finalUserId, currentSong, new PlaylistModel.OnPlaylistRemoveListener() {
+                                    @Override
+                                    public void onPlaylistRemoved() {
+                                        Log.e(TAG, "onPlaylistRemoved: remove song from favorite completed");
+                                    }
+
+                                    @Override
+                                    public void onPlaylistRemoveFailed() {
+                                        Log.e(TAG, "onPlaylistRemoveFailed: remove song from favorite failed");
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Log.e(TAG, "onFailure: remove config failed");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Log.e(TAG, "onFailure: get config failed");
+                    }
+                });
+            }
+
+            private void addSongToFavorite() {
+                String userId = userModel.getCurrentUser();
+                if (userId == null) {
+                    SharedPreferences sharedPreferences = getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                }
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("songId", currentSong.getId());
+                data.put("songName", currentSong.getName());
+                String finalUserId = userId;
+                userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                    @Override
+                    public void onCompleted(List<Map<String, Object>> config) {
+                        if (config == null) {
+                            config = new ArrayList<>();
+                        }
+
+                        if (config.size() == 0) {
+                            config.add(data);
+                        } else {
+                            for (int i = 0; i < config.size(); i++) {
+                                String songId = (String) config.get(i).get("songId");
+                                if (songId.equals(currentSong.getId())) {
+                                    config.remove(i);
+                                    break;
+                                }
+                            }
+                            config.add(data);
+                        }
+
+                        userModel.updateConfig(finalUserId, Schema.FAVORITE_SONGS, config, new UserModel.onAddConfigListener() {
+                            @Override
+                            public void onCompleted() {
+                                Log.e(TAG, "onCompleted: config update completed");
+                                playlistModel.addSongFavorite(finalUserId, finalUserId, currentSong, new PlaylistModel.OnPlaylistAddListener() {
+                                    @Override
+                                    public void onPlaylistAdded() {
+                                        Log.e(TAG, "onPlaylistAdded: add song to favorite playlist completed");
+                                    }
+
+                                    @Override
+                                    public void onPlaylistAddFailed() {
+                                        Log.e(TAG, "onPlaylistAddFailed: add song to favorite playlist failed");
+                                    }
+                                });
+
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Log.e(TAG, "onFailure: error");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Log.e(TAG, "onFailure: error");
+                    }
+                });
+            }
+        });
     }
 
     private void handleLayoutCurrentSong(int action) {
         switch (action) {
             case SongService.ACTION_START: {
-                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action);
+                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action + "; isLike: " + isLike);
                 bottomCurrentSong.setVisibility(View.VISIBLE);
                 updateCurrentSongUI();
                 updateStatusUI();
                 break;
             }
             case SongService.ACTION_PAUSE:
-            case SongService.ACTION_RESUME:{
+            case SongService.ACTION_RESUME: {
                 Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action);
                 updateStatusUI();
                 break;
@@ -265,12 +418,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case SongService.ACTION_NEXT:
             case SongService.ACTION_PREVIOUS: {
                 Log.e(TAG, "handleLayoutCurrentSong: show current song bottom with action " + action);
+                checkSongAddedToFavorite();
                 updateCurrentSongUI();
                 break;
             }
             case SongService.ACTION_PLAY_BACK: {
                 Log.e(TAG, "handleLayoutCurrentSong: show current song bottom with action " + action);
+                updateCurrentSongUI();
                 bottomCurrentSong.setVisibility(View.VISIBLE);
+                break;
+            }
+            case SongService.ACTION_SONG_LIKED: {
+                Log.e(TAG, "handleLayoutCurrentSong: song toggle liked: " + "is like: " + isLike);
+                checkSongAddedToFavorite();
+                updateStatusUI();
                 break;
             }
             case SongService.ACTION_CLOSE: {
@@ -283,7 +444,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateCurrentSongUI() {
-        if (currentSong != null  && !isNowPlaying) {
+        Log.e(TAG, "updateCurrentSongUI: is like: " + isLike + "; song: " + currentSong.getName());
+        if (currentSong != null && !isNowPlaying) {
             bottomCurrentSong.setVisibility(View.VISIBLE);
             songTitle.setText(currentSong.getName());
             songArtist.setText(currentSong.getArtistName());
@@ -294,6 +456,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             songArtist.setText(currentSong.getArtistName());
             Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
         }
+//        checkSongAddedToFavorite();
+        updateStatusUI();
     }
 
     private void updateStatusUI() {
@@ -302,6 +466,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             btnPlayPause.setImageResource(R.drawable.baseline_play_arrow_24);
         }
+
+        checkSongAddedToFavorite();
+        if (isLike) {
+            btnLike.setImageResource(R.drawable.baseline_favorite_24);
+        } else {
+            btnLike.setImageResource(R.drawable.baseline_favorite_border_24);
+        }
+    }
+
+
+    //    check song now playing is exist in farvorite list
+    public void checkSongAddedToFavorite() {
+        String userId = userModel.getCurrentUser();
+        userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(List<Map<String, Object>> config) {
+                if (config != null) {
+                    for (Map<String, Object> map : config) {
+                        String songId = (String) map.get("songId");
+                        if (songId.equals(currentSong.getId())) {
+                            btnLike.setImageResource(R.drawable.baseline_favorite_24);
+                            isLike = true;
+                            break;
+                        }
+                    }
+                    isLike = false;
+                } else {
+                    Log.e(TAG, "onCompleted: config null");
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.e(TAG, "onFailure: errror");
+            }
+        });
     }
 
     private void sendBroadcastToService(int action) {
@@ -311,9 +511,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bundle.putSerializable(App.SONGS_ARG, songs);
         bundle.putSerializable(App.CURRENT_SONG, currentSong);
         bundle.putInt(App.SONG_INDEX, songIndex);
+        bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
+        bundle.putBoolean(App.IS_REPEAT, isRepeat);
+
         intent.putExtras(bundle);
         startService(intent);
     }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -341,6 +545,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {

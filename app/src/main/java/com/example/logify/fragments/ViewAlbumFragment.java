@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -38,6 +39,7 @@ import com.example.logify.utils.BlurTransformation;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,6 +69,8 @@ public class ViewAlbumFragment extends Fragment {
     private Context context = getContext();
     private Activity activity;
     private boolean isPlaying = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -74,8 +78,11 @@ public class ViewAlbumFragment extends Fragment {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 isPlaying = bundle.getBoolean(App.IS_PLAYING);
+                isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
+                isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
+
                 int action = bundle.getInt(App.ACTION_TYPE);
-                Log.e(TAG, "onReceive: recieve " + action + " " + isPlaying);
+                Log.e(TAG, "onReceive: recieve " + action + " " + isPlaying + " isShuffle: " + isShuffle + " isRepeat: " + isRepeat);
                 handleActionReceive(action);
             }
         }
@@ -180,7 +187,12 @@ public class ViewAlbumFragment extends Fragment {
             case SongService.ACTION_PLAY_ALBUM:
             case SongService.ACTION_RESUME:
             case SongService.ACTION_PAUSE:
-            case SongService.ACTION_CLOSE:{
+            case SongService.ACTION_CLOSE: {
+                updateStatusUI();
+                break;
+            }
+            case SongService.ACTION_SHUFFLE: {
+                songIndex = new Random().nextInt(album.getSongs().size());
                 updateStatusUI();
                 break;
             }
@@ -192,6 +204,12 @@ public class ViewAlbumFragment extends Fragment {
             btnPlayAlbum.setImageResource(R.drawable.baseline_pause_24);
         } else {
             btnPlayAlbum.setImageResource(R.drawable.baseline_play_arrow_24);
+        }
+
+        if (isShuffle) {
+            btnShuffleAlbum.setImageResource(R.drawable.shuffle_active);
+        } else {
+            btnShuffleAlbum.setImageResource(R.drawable.shuffle_inactive);
         }
     }
 
@@ -227,9 +245,12 @@ public class ViewAlbumFragment extends Fragment {
             tvSortDescription.setText(album.getDescription());
             tvAlbumArtist.setText("Logify are ur friends");
         }
+
+
         handleActionButtons();
         handleShowAllArtists(artistArrayList);
     }
+
 
     private void handleActionButtons() {
         btnPlayAlbum.setOnClickListener(new View.OnClickListener() {
@@ -251,6 +272,15 @@ public class ViewAlbumFragment extends Fragment {
                 intent.putExtra(App.IS_PLAYING, isPlaying);
                 intent.putExtras(bundle);
                 getContext().startService(intent);
+            }
+        });
+
+        btnShuffleAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isShuffle = !isShuffle;
+                updateStatusUI();
+                sendActionToService(SongService.ACTION_SHUFFLE, songIndex);
             }
         });
     }
@@ -295,6 +325,9 @@ public class ViewAlbumFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putSerializable(App.SONGS_ARG, album.getSongs());
         intent.putExtra(App.SONG_INDEX, position);
+        intent.putExtra(App.IS_PLAYING, isPlaying);
+        intent.putExtra(App.IS_SHUFFLE, isShuffle);
+        intent.putExtra(App.IS_REPEAT, isRepeat);
         intent.putExtras(bundle);
         getContext().startService(intent);
     }

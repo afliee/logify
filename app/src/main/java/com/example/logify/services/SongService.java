@@ -42,6 +42,8 @@ import com.example.logify.receivers.SongReceiver;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 public class SongService extends Service {
     private static final String TAG = "SongService";
@@ -56,6 +58,9 @@ public class SongService extends Service {
     public static final int ACTION_CLOSE = 7;
     public static final int ACTION_PLAY_ALBUM = 8;
     public static final int ACTION_PLAY_BACK = 9;
+    public static final int ACTION_SHUFFLE = 10;
+    public static final int ACTION_REPEAT = 11;
+    public static final int ACTION_SONG_LIKED = 12;
 
     private Song song;
     private ArrayList<Song> songs;
@@ -63,7 +68,10 @@ public class SongService extends Service {
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false;
     private boolean isNowPlaying = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
     private SongModel songModel = new SongModel();
+
     public SongService() {
     }
 
@@ -102,6 +110,8 @@ public class SongService extends Service {
             if (songs != null) {
                 songIndex = bundle.getInt(App.SONG_INDEX);
                 isNowPlaying = bundle.getBoolean(App.IN_NOW_PLAYING);
+                isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
+                isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
                 song = songs.get(songIndex);
                 Log.e(TAG, "onStartCommand: hadnle " + songIndex + " " + song.toString());
 //                play();
@@ -149,6 +159,7 @@ public class SongService extends Service {
                             e.printStackTrace();
                         }
                     }
+
                     @Override
                     public void onSongNotExist() {
                         Toast.makeText(SongService.this, "Resource song not found", Toast.LENGTH_SHORT).show();
@@ -225,7 +236,7 @@ public class SongService extends Service {
         startForeground(1, notification);
     }
 
-//    get pending intent to send broadcast to service
+    //    get pending intent to send broadcast to service
     private PendingIntent getPendingIntent(Context context, int action) {
         Intent intent = new Intent(this, SongReceiver.class);
         Bundle bundle = new Bundle();
@@ -266,12 +277,33 @@ public class SongService extends Service {
             case ACTION_PLAY_BACK:
                 playBack();
                 break;
+            case ACTION_SHUFFLE:
+                shuffle();
+                break;
+            case ACTION_REPEAT:
+                repeat();
+                break;
+            case ACTION_SONG_LIKED:
+                songLiked();
+                break;
             case ACTION_CLOSE:
                 stopSelf();
                 sendBroadcastToActivity(ACTION_CLOSE);
                 break;
 
         }
+    }
+
+    private void songLiked() {
+        sendBroadcastToActivity(ACTION_SONG_LIKED);
+    }
+
+    private void repeat() {
+        sendBroadcastToActivity(ACTION_REPEAT);
+    }
+
+    private void shuffle() {
+        sendBroadcastToActivity(ACTION_SHUFFLE);
     }
 
     private void resume() {
@@ -305,17 +337,23 @@ public class SongService extends Service {
 
     private void next() {
         Toast.makeText(this, "Next button clicked", Toast.LENGTH_SHORT).show();
-        if (songIndex < songs.size() - 1) {
-            songIndex++;
-        } else {
-            songIndex = 0;
+        if (isShuffle) {
+            songIndex = new Random().nextInt(songs.size());
         }
+
+        if (!isRepeat) {
+            if (songIndex < songs.size() - 1) {
+                songIndex++;
+            } else {
+                songIndex = 0;
+            }
+        }
+
         song = songs.get(songIndex);
         Log.e(TAG, "next: handle next method: " + songIndex + " " + songs.size() + " " + songs.get(songIndex).toString());
         play();
         sendBroadcastToActivity(ACTION_NEXT);
     }
-
 
 
     private void pause() {
@@ -338,6 +376,8 @@ public class SongService extends Service {
         bundle.putInt(App.SONG_INDEX, songIndex);
         bundle.putBoolean(App.IN_NOW_PLAYING, isNowPlaying);
         bundle.putInt(App.ACTION_TYPE, action);
+        bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
+        bundle.putBoolean(App.IS_REPEAT, isRepeat);
 
         intent.putExtras(bundle);
 

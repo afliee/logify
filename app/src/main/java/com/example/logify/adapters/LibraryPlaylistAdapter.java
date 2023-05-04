@@ -50,7 +50,11 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter{
         LibraryPlaylistViewHolder libPlaylistViewHolder = (LibraryPlaylistViewHolder) holder;
         libPlaylistViewHolder.tvPlaylistName.setText(playlist.getTitle());
         libPlaylistViewHolder.tvTitle.setText("My playlist");
-        Glide.with(context).load(playlist.getImage()).into(libPlaylistViewHolder.imvPlaylist);
+        if (playlist.getImage().isEmpty()) {
+            Glide.with(context).load(R.drawable.default_playlist).into(libPlaylistViewHolder.imvPlaylist);
+        } else {
+            Glide.with(context).load(playlist.getImage()).into(libPlaylistViewHolder.imvPlaylist);
+        }
     }
 
     @Override

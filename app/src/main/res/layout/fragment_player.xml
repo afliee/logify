@@ -216,8 +216,7 @@
             android:layout_marginStart="@dimen/_16dp"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/_16dp"
-            app:tint="?attr/iconTintColor"
-            android:src="@drawable/shuffle_32" />
+            android:src="@drawable/shuffle_inactive_32" />
 
         <ImageView
             android:id="@+id/btn_previous"
@@ -226,7 +225,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/_16dp"
             android:layout_marginEnd="@dimen/_16dp"
-            app:tint="?attr/iconTintColor"
             android:src="@drawable/baseline_skip_previous_48" />
 
         <ImageView
@@ -248,7 +246,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/_16dp"
             android:layout_marginEnd="@dimen/_16dp"
-            app:tint="?attr/iconTintColor"
             android:src="@drawable/baseline_skip_next_48" />
 
         <ImageView
@@ -258,9 +255,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/_16dp"
             android:layout_marginEnd="@dimen/_16dp"
-            app:tint="?attr/iconTintColor"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/repeat_32" />
+            android:src="@drawable/repeat_inactive_32" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

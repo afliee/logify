@@ -1,5 +1,6 @@
 package com.example.logify.entities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ public class Playlist {
     private String image;
     private String userId;
     private String createdDate;
+    private ArrayList<Song> songs;
 
 /**
      * This is a constructor method to create a new instance of Topic class.
@@ -28,6 +30,25 @@ public class Playlist {
         this.image = image;
         this.userId = userId;
         this.createdDate = createdDate;
+    }
+
+    public Playlist() {
+    }
+
+    public ArrayList<Song> getSongs() {
+        return songs;
+    }
+
+    public String getPlaylistName() {
+        return playlistName;
+    }
+
+    public void setPlaylistName(String playlistName) {
+        this.playlistName = playlistName;
+    }
+
+    public void setSongs(ArrayList<Song> songs) {
+        this.songs = songs;
     }
 
     public String getId() {

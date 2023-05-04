@@ -16,6 +16,8 @@ public class App {
     public static final String ARTIST_ARG = "artist";
     public static final String SONGS_ARG = "songs";
     public static final String IN_NOW_PLAYING = "nowPlaying";
+    public static final String IS_SHUFFLE = "isShuffle";
+    public static final String IS_REPEAT = "isRepeat";
 
 //    configuration
     public static final String CONFIGURATION = "configuration";

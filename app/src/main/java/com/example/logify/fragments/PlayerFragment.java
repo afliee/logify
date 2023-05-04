@@ -60,6 +60,8 @@ public class PlayerFragment extends Fragment {
 
     private boolean isPlaying = false;
     private boolean isLike = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
     private UserModel userModel;
     private PlaylistModel playlistModel;
 
@@ -72,11 +74,13 @@ public class PlayerFragment extends Fragment {
                 song = (Song) bundle.getSerializable(App.CURRENT_SONG);
                 int action = bundle.getInt(App.ACTION_TYPE);
                 songIndex = bundle.getInt(App.SONG_INDEX);
+                isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
+                isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
                 songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
                 if (songs != null) {
                     Log.e(TAG, "onReceive: song: " + songs.size());
                 }
-                Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying);
+                Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat);
                 handleActionReceive(action);
             }
         }
@@ -129,6 +133,8 @@ public class PlayerFragment extends Fragment {
         song = (Song) bundle.getSerializable(App.CURRENT_SONG);
         songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
         isPlaying = bundle.getBoolean(App.IS_PLAYING);
+        isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
+        isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
         songIndex = bundle.getInt(App.SONG_INDEX);
         userModel = new UserModel();
         playlistModel = new PlaylistModel();
@@ -155,6 +161,7 @@ public class PlayerFragment extends Fragment {
         btnNext = view.findViewById(R.id.btn_next);
         btnRepeat = view.findViewById(R.id.btn_repeat);
         btnBack = view.findViewById(R.id.btn_back);
+        btnShuffle = view.findViewById(R.id.btn_shuffle);
 
         tvSeekbarCurrentPosition = view.findViewById(R.id.seek_bar_current_time);
         tvSeekbarDuration = view.findViewById(R.id.seek_bar_total_time);
@@ -165,6 +172,7 @@ public class PlayerFragment extends Fragment {
         seekBar = view.findViewById(R.id.seek_bar);
 
         initUI();
+        updateStatusUI();
         checkSongAddedToFavorite();
         handleBackAction();
         handleActions();
@@ -246,6 +254,7 @@ public class PlayerFragment extends Fragment {
                                     @Override
                                     public void onPlaylistRemoved() {
                                         Log.e(TAG, "onPlaylistRemoved: remove song from favorite completed");
+                                        sendBroadcastToService(SongService.ACTION_SONG_LIKED);
                                     }
 
                                     @Override
@@ -307,6 +316,7 @@ public class PlayerFragment extends Fragment {
                                     @Override
                                     public void onPlaylistAdded() {
                                         Log.e(TAG, "onPlaylistAdded: add song to favorite playlist completed");
+                                        sendBroadcastToService(SongService.ACTION_SONG_LIKED);
                                     }
 
                                     @Override
@@ -329,6 +339,24 @@ public class PlayerFragment extends Fragment {
                         Log.e(TAG, "onFailure: error");
                     }
                 });
+            }
+        });
+
+        btnShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isShuffle = !isShuffle;
+                updateStatusUI();
+                sendBroadcastToService(SongService.ACTION_SHUFFLE);
+            }
+        });
+
+        btnRepeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRepeat = !isRepeat;
+                updateStatusUI();
+                sendBroadcastToService(SongService.ACTION_REPEAT);
             }
         });
     }
@@ -375,7 +403,16 @@ public class PlayerFragment extends Fragment {
                 initUI();
                 break;
             }
-
+            case SongService.ACTION_SHUFFLE: {
+                Log.e(TAG, "handleActionReceive: shuffle: " + isShuffle);
+                updateStatusUI();
+                break;
+            }
+            case SongService.ACTION_REPEAT: {
+                Log.e(TAG, "handleActionReceive: repeat: " + isRepeat);
+                updateStatusUI();
+                break;
+            }
         }
     }
 
@@ -398,6 +435,18 @@ public class PlayerFragment extends Fragment {
             btnLike.setImageResource(R.drawable.baseline_favorite_24);
         } else {
             btnLike.setImageResource(R.drawable.baseline_favorite_border_24);
+        }
+
+        if (isShuffle) {
+            btnShuffle.setImageResource(R.drawable.shuffle_active_32);
+        } else {
+            btnShuffle.setImageResource(R.drawable.shuffle_inactive_32);
+        }
+
+        if (isRepeat) {
+            btnRepeat.setImageResource(R.drawable.repeat_active_32);
+        } else {
+            btnRepeat.setImageResource(R.drawable.repeat_inactive_32);
         }
     }
 
@@ -449,6 +498,9 @@ public class PlayerFragment extends Fragment {
         bundle.putSerializable(App.CURRENT_SONG, song);
         bundle.putInt(App.SONG_INDEX, songIndex);
         bundle.putBoolean(App.IN_NOW_PLAYING, true);
+        bundle.putBoolean(App.IS_PLAYING, isPlaying);
+        bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
+        bundle.putBoolean(App.IS_REPEAT, isRepeat);
         intent.putExtras(bundle);
         getActivity().startService(intent);
     }

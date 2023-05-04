@@ -1,5 +1,7 @@
 package com.example.logify.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -10,16 +12,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.logify.R;
 import com.example.logify.adapters.LibraryArtistAdapter;
 import com.example.logify.adapters.LibraryPlaylistAdapter;
 import com.example.logify.adapters.SearchSuggestAdapter;
 import com.example.logify.adapters.SongAdapter;
+import com.example.logify.constants.App;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
 import com.example.logify.entities.Song;
 import com.example.logify.entities.User;
+import com.example.logify.models.PlaylistModel;
+import com.example.logify.models.UserModel;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -42,6 +48,8 @@ public class LibraryFragment extends Fragment {
     private String mParam2;
     private RecyclerView rcvPlaylist;
     private RecyclerView rcvArtist;
+    private final PlaylistModel playlistModel = new PlaylistModel();
+    private final UserModel userModel = new UserModel();
 
     public LibraryFragment() {
         // Required empty public constructor
@@ -89,26 +97,31 @@ public class LibraryFragment extends Fragment {
 
     public void initPlaylist() {
         RecyclerView.LayoutManager layoutManager;
-        LibraryPlaylistAdapter adapter;
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         rcvPlaylist.setLayoutManager(layoutManager);
 
         User user = new User(UUID.randomUUID().toString(), "username", "0111111111", "1111111");
 
-        ArrayList<Playlist> playlists = new ArrayList<>();
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist1", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist2", "nothing", "https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2022%2F11%2Fsza-sos-album-cover-artwork-reveal-image-announcement-TW.jpg?w=960&cbr=1&q=90&fit=max", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist3", "nothing", "https://i.pinimg.com/564x/1e/1c/85/1e1c850adc6e2cefded8b64e7c41e51e.jpg", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist4", "nothing", "https://i.pinimg.com/564x/2e/5b/bc/2e5bbcb27da33a3a27eea743d92f4a3e.jpg", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist5", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist6", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist7", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
-        playlists.add(new Playlist(UUID.randomUUID().toString(), "playlist8", "nothing", "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg?ts=1561488440", user.getUuid(), LocalTime.now().toString()));
+        String userId = userModel.getCurrentUser();
+        if (userId == null) {
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+        }
 
+        playlistModel.getPrivatePlaylist(userId, new PlaylistModel.OnGetPlaylistListener() {
+            @Override
+            public void onGetPlaylist(ArrayList<Playlist> playlists) {
+                LibraryPlaylistAdapter adapter = new LibraryPlaylistAdapter(getContext());
+                adapter.setPlaylists(playlists);
+                rcvPlaylist.setAdapter(adapter);
+                
+            }
 
-        adapter = new LibraryPlaylistAdapter(getContext());
-        adapter.setPlaylists(playlists);
-        rcvPlaylist.setAdapter(adapter);
+            @Override
+            public void onGetPlaylistFailed() {
+                Toast.makeText(getContext(), "No Data Now 🦄", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void initArtist() {

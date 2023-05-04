@@ -237,6 +237,12 @@ public class SignInActivity extends AppCompatActivity {
                         Log.e(TAG, "firebaseAuthWithGoogle: user " + user.getDisplayName());
                         userModel.addUserWithGoogle(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl());
 
+                        if (cbRememberMe.isChecked()) {
+                            SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("uuid", user.getUid());
+                            editor.apply();
+                        }
 
                         Intent intent = new Intent(SignInActivity.this, MainActivity.class);
                         startActivity(intent);

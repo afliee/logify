@@ -3,7 +3,9 @@ package com.example.logify.fragments;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,11 +26,13 @@ import com.example.logify.R;
 import com.example.logify.adapters.LibraryArtistAdapter;
 import com.example.logify.adapters.SearchResultAdapter;
 import com.example.logify.adapters.SearchSuggestAdapter;
+import com.example.logify.entities.Album;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
 import com.example.logify.entities.Song;
 import com.example.logify.entities.User;
 import com.example.logify.models.ArtistModel;
+import com.example.logify.models.PlaylistModel;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -45,8 +49,10 @@ public class SearchFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String TAG = "SearchFragment";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private PlaylistModel playlistModel = new PlaylistModel();
     private ArtistModel artistModel = new ArtistModel();
     RecyclerView rcvSearchSuggestItems;
     private RecyclerView rcvResult;
@@ -183,6 +189,35 @@ public class SearchFragment extends Fragment {
                 int start = random.nextInt(artists.size() - 40);
                 int end = start + 40;
                 adapter.setArtists(new ArrayList<>(artists.subList(start, end)));
+
+                adapter.setOnItemClickListener(new SearchSuggestAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Artist artist) {
+                        Log.e(TAG, "onItemClick: " + artist.getName() + " clicked");
+                        playlistModel.getPublicPlaylist(artist.getPlaylistId(), new PlaylistModel.OnGetPublicPlaylistListener() {
+                            @Override
+                            public void onGetPublicPlaylist(Album album) {
+                                album.setImage(artist.getImage());
+                                album.setName(artist.getName());
+                                Log.e(TAG, "onGetPublicPlaylist: album: " + album.toString());
+                                AppCompatActivity activity = (AppCompatActivity) getContext();
+                                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("album", album);
+                                ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                                viewAlbumFragment.setArguments(bundle);
+                                fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+                                fragmentTransaction.addToBackStack(null);
+                                fragmentTransaction.commit();
+                            }
+
+                            @Override
+                            public void onGetPublicPlaylistFailed() {
+                                Log.e(TAG, "onGetPublicPlaylistFailed: erorr");
+                            }
+                        });
+                    }
+                });
             }
         });
         rcvSearchSuggestItems.setAdapter(adapter);

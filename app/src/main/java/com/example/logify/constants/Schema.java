@@ -17,4 +17,13 @@ public class Schema {
         public static final String DURATION = "duration";
         public static final String IMAGE = "imageResource";
     }
+
+    public static class PlaylistType {
+        public static final String ID = "id";
+        public static final String NAME = "name";
+        public static final String IMAGE = "image";
+        public static final String DESCRIPTION = "description";
+        public static final String SONGS = "favoriteSongs";
+        public static final String CREATED_DATE = "createdDate";
+    }
 }

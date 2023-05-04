@@ -148,8 +148,7 @@
                     android:contentDescription="TODO"
                     android:minWidth="48dp"
                     android:minHeight="48dp"
-                    app:tint="?attr/iconTintColor"
-                    android:src="@drawable/shuffle" />
+                    android:src="@drawable/shuffle_inactive" />
 
                 <ImageButton
                     android:id="@+id/play_album"

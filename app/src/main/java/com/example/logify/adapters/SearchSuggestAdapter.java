@@ -21,6 +21,11 @@ public class SearchSuggestAdapter extends RecyclerView.Adapter {
     private Context context;
     private ArrayList<Artist> artists;
 
+    public interface OnItemClickListener {
+        void onItemClick(Artist artist);
+    }
+
+    private OnItemClickListener onItemClickListener;
     public SearchSuggestAdapter(Context context) {
         this.context = context;
     }
@@ -35,6 +40,9 @@ public class SearchSuggestAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -57,7 +65,7 @@ public class SearchSuggestAdapter extends RecyclerView.Adapter {
         return artists == null ? 0 : artists.size();
     }
 
-    private class SearchSuggestViewHolder extends RecyclerView.ViewHolder {
+    private class SearchSuggestViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imvSearchItem;
         private TextView tvSearchItem;
         private CardView cvSearchItem;
@@ -66,6 +74,14 @@ public class SearchSuggestAdapter extends RecyclerView.Adapter {
             imvSearchItem = view.findViewById(R.id.imvSearchItem);
             tvSearchItem = view.findViewById(R.id.tvSearchItem);
             cvSearchItem = view.findViewById(R.id.cvSearchItem);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getLayoutPosition();
+            Artist artist = artists.get(position);
+            onItemClickListener.onItemClick(artist);
         }
     }
 }
