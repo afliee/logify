@@ -1,20 +1,27 @@
 package com.example.logify.fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +41,7 @@ import com.example.logify.constants.App;
 import com.example.logify.constants.Schema;
 import com.example.logify.entities.Song;
 import com.example.logify.models.PlaylistModel;
+import com.example.logify.models.SongModel;
 import com.example.logify.models.UserModel;
 import com.example.logify.services.SongService;
 import com.example.logify.utils.BlurTransformation;
@@ -53,11 +61,12 @@ import jp.wasabeef.glide.transformations.internal.Utils;
 public class PlayerFragment extends Fragment {
 
     private static final String TAG = "PlayerFragment";
+    private static final int REQUEST_CODE = 100;
     private Song song;
     private ArrayList<Song> songs;
     private int songIndex;
     private ImageView blurImageBackground, imgSong;
-    private ImageView btnShare, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat, btnBack, btnAddToPlaylist;
+    private ImageView btnDownload, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat, btnBack, btnAddToPlaylist;
     private TextView tvSeekbarCurrentPosition, tvSeekbarDuration;
     private TextView tvSongName, tvSongAtistName;
     private SeekBar seekBar;
@@ -73,6 +82,7 @@ public class PlayerFragment extends Fragment {
     private String[] playlistNames;
     private UserModel userModel;
     private PlaylistModel playlistModel;
+    private SongModel songModel;
     private Handler handler = new Handler();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -149,6 +159,7 @@ public class PlayerFragment extends Fragment {
         songIndex = bundle.getInt(App.SONG_INDEX, 0);
         userModel = new UserModel();
         playlistModel = new PlaylistModel();
+        songModel = new SongModel();
         if (songs != null) {
             Log.e(TAG, "onCreateView: songs size receive: " + songs.size());
         }
@@ -164,7 +175,7 @@ public class PlayerFragment extends Fragment {
         blurImageBackground = view.findViewById(R.id.blur_image_background);
         imgSong = view.findViewById(R.id.image_song);
 
-        btnShare = view.findViewById(R.id.btn_share);
+        btnDownload = view.findViewById(R.id.btn_download);
         btnLike = view.findViewById(R.id.btn_favorite);
 
         btnPrevious = view.findViewById(R.id.btn_previous);
@@ -504,6 +515,21 @@ public class PlayerFragment extends Fragment {
                 sendBroadcastToService(SongService.ACTION_REPEAT);
             }
         });
+
+        btnDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                check permission
+                if (Environment.isExternalStorageManager()) {
+                    downloadSong();
+                } else {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+                    intent.setData(uri);
+                    activity.startActivityForResult(intent, 1000);
+                }
+            }
+        });
     }
 
     public void checkSongAddedToFavorite() {
@@ -561,6 +587,7 @@ public class PlayerFragment extends Fragment {
                 updateSeekbarUI();
                 updateStatusUI();
                 initUI();
+                removeUpdateCurrentDuration();
                 break;
             }
             case SongService.ACTION_SHUFFLE: {
@@ -717,5 +744,21 @@ public class PlayerFragment extends Fragment {
             return (minutes + 1) + ":00";
         else
             return minutes + ":" + seconds;
+    }
+
+    private void downloadSong() {
+        if (activity != null) {
+            songModel.download(song.getId(), song.getName(), new SongModel.OnDownloadSongListener() {
+                @Override
+                public void onDownloadSongSuccess() {
+                    Toast.makeText(activity, "Downloaded", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onDownloadSongFailed() {
+                    Toast.makeText(activity, "Download failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }

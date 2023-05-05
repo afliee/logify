@@ -50,6 +50,11 @@ public class PlaylistModel extends Model {
         void onPlaylistAddFailed();
     }
 
+    public interface OnPlaylistDeletedListener {
+        void onPlaylistDeleted();
+
+        void onPlaylistDeleteFailed();
+    }
     public interface OnPlaylistRemoveListener {
         void onPlaylistRemoved();
 
@@ -519,5 +524,32 @@ public class PlaylistModel extends Model {
         });
     }
 
+    public void removePrivatePlaylist(String userId, String playlistId, OnPlaylistDeletedListener listener) {
+        if (userId == null || playlistId == null) {
+            listener.onPlaylistDeleteFailed();
+            return;
+        }
+        if (userId.equals(playlistId)) {
+            listener.onPlaylistDeleteFailed();
+            return;
+        }
+        Query query = database.child(Schema.PLAYLISTS).child(userId).child(playlistId);
 
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    database.child(Schema.PLAYLISTS).child(userId).child(playlistId).removeValue();
+                    listener.onPlaylistDeleted();
+                } else {
+                    listener.onPlaylistDeleteFailed();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 }

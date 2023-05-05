@@ -24,7 +24,11 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter <RecyclerView
         void onItemClick(Playlist playlist);
     }
 
+    public interface OnItemLongClickListener {
+        void onItemLongClick(Playlist playlist);
+    }
     private OnItemClickListener listener;
+    private OnItemLongClickListener longClickListener;
 
     public LibraryPlaylistAdapter(Context context) {
         this.context = context;
@@ -44,6 +48,9 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter <RecyclerView
         this.listener = listener;
     }
 
+    public void setOnItemLongClickListener(OnItemLongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
+    }
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -71,7 +78,7 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter <RecyclerView
         return playlists == null ? 0 : playlists.size();
     }
 
-    private class LibraryPlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private class LibraryPlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private ImageView imvPlaylist;
         private TextView tvPlaylistName;
         private TextView tvTitle;
@@ -83,6 +90,7 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter <RecyclerView
             tvTitle = itemView.findViewById(R.id.tvTitle);
             libPlaylistItem = itemView.findViewById(R.id.libPlaylistItem);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
@@ -90,6 +98,14 @@ public class LibraryPlaylistAdapter  extends  RecyclerView.Adapter <RecyclerView
             int position = getAdapterPosition();
             Playlist playlist = playlists.get(position);
             listener.onItemClick(playlist);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            int position = getAdapterPosition();
+            Playlist playlist = playlists.get(position);
+            longClickListener.onItemLongClick(playlist);
+            return true;
         }
     }
 }

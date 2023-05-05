@@ -71,5 +71,5 @@
     <string name="recently_playlist">Recently Played</string>
     <string name="enter_playlist">Enter playlist name</string>
     <string name="playlist_name">Playlist Name:</string>
-
+    <string name="permission_required">Require Permission</string>
 </resources>

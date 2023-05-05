@@ -152,9 +152,7 @@ public class ViewAlbumFragment extends Fragment {
         tvArtistContributionTitle = albumView.findViewById(R.id.artist_contributor_title);
         tvSeeAllArtists = albumView.findViewById(R.id.see_all);
 
-        btnAddToPlaylist = albumView.findViewById(R.id.add_to_playlist);
-        btnDownloadAlbum = albumView.findViewById(R.id.download_album);
-        btnShareAlbum = albumView.findViewById(R.id.share_album);
+
         btnShuffleAlbum = albumView.findViewById(R.id.shuffle_album);
         btnPlayAlbum = albumView.findViewById(R.id.play_album);
 

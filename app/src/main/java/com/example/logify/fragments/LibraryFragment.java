@@ -164,6 +164,79 @@ public class LibraryFragment extends Fragment {
                         });
                     }
                 });
+
+                adapter.setOnItemLongClickListener(new LibraryPlaylistAdapter.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(Playlist playlist) {
+                        Log.e(TAG, "onItemLongClick: playlist " + playlist.getPlaylistName() + " long clicked");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Delete Playlist");
+                        builder.setMessage("Are you sure to delete this playlist?");
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String userId = userModel.getCurrentUser();
+                                if (userId == null) {
+                                    SharedPreferences sharedPreferences = getContext().getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                                }
+                                if (userId != null) {
+                                    String finalUserId1 = userId;
+                                    userModel.getConfig(userId, Schema.PRIVATE_PLAYLISTS, new UserModel.onGetConfigListener() {
+                                        @Override
+                                        public void onCompleted(List<Map<String, Object>> config) {
+                                            if (config == null || config.size() == 0) {
+                                                Log.e(TAG, "onCompleted: config is null");
+                                                return;
+                                            }
+
+                                            for (Map<String, Object> map : config) {
+                                                if (map.get("id").equals(playlist.getId())) {
+                                                    config.remove(map);
+                                                    break;
+                                                }
+                                            }
+
+                                            userModel.updateConfig(finalUserId1, Schema.PRIVATE_PLAYLISTS, config, new UserModel.onAddConfigListener() {
+                                                @Override
+                                                public void onCompleted() {
+                                                    Log.e(TAG, "onCompleted: delete config private playlist success");
+                                                    playlistModel.removePrivatePlaylist(finalUserId1, playlist.getId(), new PlaylistModel.OnPlaylistDeletedListener() {
+                                                        @Override
+                                                        public void onPlaylistDeleted() {
+                                                            Log.e(TAG, "onPlaylistDeleted: delete private playlist success");
+                                                            Toast.makeText(getContext(), "Delete Playlist Success", Toast.LENGTH_SHORT).show();
+                                                            initPlaylist();
+                                                        }
+
+                                                        @Override
+                                                        public void onPlaylistDeleteFailed() {
+                                                            Log.e(TAG, "onPlaylistDeleteFailed: delete private playlist failed");
+                                                            Toast.makeText(getContext(), "You don't have delete your default playlist", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+
+                                                }
+
+                                                @Override
+                                                public void onFailure() {
+
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onFailure() {
+                                            Log.e(TAG, "onFailure: error to get config user");
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                        builder.setNegativeButton("No", null);
+                        builder.show();
+                    }
+                });
             }
 
             @Override
@@ -227,6 +300,8 @@ public class LibraryFragment extends Fragment {
                             });
                         }
                     });
+
+
                 }
 
                 @Override
