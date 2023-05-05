@@ -200,7 +200,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateProfile() {
-        String userId = mAuth.getCurrentUser().getUid();
+        String userId = userModel.getCurrentUser();
+        if (userId == null) {
+            SharedPreferences sharedPreferences = getSharedPreferences(App.SHARED_PREFERENCES_USER, MODE_PRIVATE);
+            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+        }
+
         if (userId != null) {
             userModel.getUser(userId, new UserModel.UserCallBacks() {
                 @Override

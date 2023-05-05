@@ -157,6 +157,12 @@ public class SignInActivity extends AppCompatActivity {
                 public void onCompleted(User user) {
                     if (user != null) {
                         Log.e(TAG, "onCompleted: Login success " + user.getPhoneNumber());
+                        if (cbRememberMe.isChecked()) {
+                            SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("uuid", user.getUuid());
+                            editor.apply();
+                        }
                         Intent intent = new Intent(SignInActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
