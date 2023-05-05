@@ -122,18 +122,29 @@ public class PlaylistModel extends Model {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
 
-                    Object songs = snapshot.getValue();
-                    if (songs instanceof List) {
-                        JSONArray jsonArray = new JSONArray((List) songs);
-                        if (jsonArray != null) {
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject jsonObject = jsonArray.optJSONObject(i);
-                                String id = jsonObject.optString(Schema.SongType.ID);
-                                if (id.equals(song.getId())) {
-                                    listener.onPlaylistAddFailed();
-                                    return;
-                                }
-                            }
+//                    Object songs = snapshot.getValue();
+//                    if (songs instanceof List) {
+//                        JSONArray jsonArray = new JSONArray((List) songs);
+//                        if (jsonArray != null) {
+//                            for (int i = 0; i < jsonArray.length(); i++) {
+//                                JSONObject jsonObject = jsonArray.optJSONObject(i);
+//                                String id = jsonObject.optString(Schema.SongType.ID);
+//                                Log.e(TAG, "onDataChange: add song to favorite id:  " + id);
+//                                if (id.equals(song.getId())) {
+//                                    listener.onPlaylistAddFailed();
+//                                    return;
+//                                }
+//                            }
+//                        }
+//                    }
+
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        JSONObject jsonObject = new JSONObject((Map) dataSnapshot.getValue());
+                        String id = jsonObject.optString(Schema.SongType.ID);
+                        Log.e(TAG, "onDataChange: add song to favorite id:  " + id);
+                        if (id.equals(song.getId())) {
+                            listener.onPlaylistAddFailed();
+                            return;
                         }
                     }
                     database.child(Schema.PLAYLISTS).child(userId).child(playlistId).child(Schema.FAVORITE_SONGS).push().setValue(songMap).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -483,6 +494,27 @@ public class PlaylistModel extends Model {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+    }
+
+    public void addPrivatePlaylist(String userId, String playlistId, Map<String, Object> values, OnPlaylistAddListener listener) {
+        Query query = database.child(Schema.PLAYLISTS).child(userId).child(playlistId);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    database.child(Schema.PLAYLISTS).child(userId).child(playlistId).setValue(values);
+                    listener.onPlaylistAdded();
+                } else {
+                    listener.onPlaylistAddFailed();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                listener.onPlaylistAddFailed();
             }
         });
     }

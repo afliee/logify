@@ -85,8 +85,22 @@ public class SongService extends Service {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    Log.e(TAG, "onCompletion: finish song " + song.toString());
-                    next();
+                    Log.e(TAG, "onCompletion: finish song " + song.getName());
+//                    if (isRepeat) {
+//                        play();
+//                    } else {
+//                        if (isShuffle) {
+//                            Random random = new Random();
+//                            songIndex = random.nextInt(songs.size());
+//                        } else {
+//                            songIndex++;
+//                        }
+//                        if (songIndex >= songs.size()) {
+//                            songIndex = 0;
+//                        }
+//                        song = songs.get(songIndex);
+//                        play();
+//                    }
                 }
             });
         }
@@ -116,7 +130,7 @@ public class SongService extends Service {
                 isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
                 seekTo = bundle.getInt(App.SEEK_BAR_PROGRESS, 0);
                 song = songs.get(songIndex);
-                Log.e(TAG, "onStartCommand: hadnle " + songIndex + " " + song.toString() + "; isShuffle: " + isShuffle + " ; isRepeat: " + isRepeat + "; seekto: " + seekTo);
+                Log.e(TAG, "onStartCommand: hadnle song index:  " + songIndex + " " + song.toString() + "; isShuffle: " + isShuffle + " ; isRepeat: " + isRepeat + "; seekto: " + seekTo);
 //                play();
 //                sendNotification();
             }
@@ -166,6 +180,7 @@ public class SongService extends Service {
                     @Override
                     public void onSongNotExist() {
                         Toast.makeText(SongService.this, "Resource song not found", Toast.LENGTH_SHORT).show();
+                        next();
                     }
                 });
             } else {

@@ -54,7 +54,7 @@
     <string name="nav_logout">Logout</string>
     <string name="search">Search</string>
     <string name="profile">Profile</string>
-    <string name="albums">Playlists</string>
+    <string name="albums">Library</string>
     <string name="alex_xid">Alex Xid</string>
     <string name="contact_email">contact@contact.com</string>
     <string name="open_nav">Open Navigator</string>
@@ -69,5 +69,7 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="back_button">Back Button</string>
     <string name="recently_playlist">Recently Played</string>
+    <string name="enter_playlist">Enter playlist name</string>
+    <string name="playlist_name">Playlist Name:</string>
 
 </resources>

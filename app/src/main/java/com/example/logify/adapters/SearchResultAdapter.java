@@ -103,15 +103,15 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 break;
             case TYPE_VIEW2:
                 Artist artist = (Artist) SearchResultAdapter.this.items.get(position);
-                SearchResultAdapter.ViewHolderArtist viewHolder2 = (SearchResultAdapter.ViewHolderArtist) holder;
+                ViewHolderArtist viewHolder2 = (ViewHolderArtist) holder;
                 viewHolder2.tvArtistName.setText(artist.getName());
-                String artistName = artist.getCreatedDate().isEmpty() ? "Artist" : artist.getName();
-                viewHolder2.tvTitle.setText(artistName);
+//                String artistName = artist.getCreatedDate().isEmpty() ? "Artist" : artist.getName();
+                viewHolder2.tvTitle.setText("Artists");
                 Glide.with(context).load(artist.getImage()).into(viewHolder2.imvLibraryArtist);
                 break;
             case TYPE_VIEW3:
                 Song song = (Song) SearchResultAdapter.this.items.get(position);
-                SearchResultAdapter.ViewHolderSong viewHolder3 = (SearchResultAdapter.ViewHolderSong) holder;
+                ViewHolderSong viewHolder3 = (ViewHolderSong) holder;
                 viewHolder3.tvSongName.setText(song.getName());
                 String songName = song.getArtistName().isEmpty() ? "Song" : song.getArtistName();
                 viewHolder3.tvTitle.setText(songName);
@@ -151,7 +151,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    private static class ViewHolderArtist extends RecyclerView.ViewHolder {
+    private  class ViewHolderArtist extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imvLibraryArtist;
         private TextView tvArtistName;
         private TextView tvTitle;
@@ -164,10 +164,20 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             clLibraryArtist = itemView.findViewById(R.id.rcvArtist);
             tvTitle = itemView.findViewById(R.id.tvTitle);
 //            tvTitle.setText("Artists");
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Object object = items.get(position);
+            if (object != null) {
+                listener.onItemClick(object, position);
+            }
         }
     }
 
-    private static class ViewHolderSong extends RecyclerView.ViewHolder {
+    private  class ViewHolderSong extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ShapeableImageView imvSong;
         private TextView tvSongName;
         private TextView tvTitle;
@@ -180,7 +190,16 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             clLibraryArtist = itemView.findViewById(R.id.rcvSearchResult);
             tvTitle = itemView.findViewById(R.id.description);
 //            tvTitle.setText("Song");
+            itemView.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Object object = items.get(position);
+            if (object != null) {
+                listener.onItemClick(object, position);
+            }
+        }
     }
 }

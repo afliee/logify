@@ -1,8 +1,12 @@
 package com.example.logify.fragments;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -13,7 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.logify.R;
+import com.example.logify.constants.App;
+import com.example.logify.entities.User;
+import com.example.logify.models.UserModel;
 import com.google.android.material.imageview.ShapeableImageView;
 
 /**
@@ -37,6 +45,10 @@ public class SettingFragment extends Fragment {
     private TextView tvUserPhone;
     private TextView tvUserEmail;
     private TextView tvUserEdit;
+    private final UserModel userModel = new UserModel();
+    private Activity activity;
+
+
     public SettingFragment() {
         // Required empty public constructor
     }
@@ -69,6 +81,19 @@ public class SettingFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        activity = getActivity();
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        activity = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -90,6 +115,12 @@ public class SettingFragment extends Fragment {
 
 ////                add bundle to fragment
                 Bundle bundle = new Bundle();
+                String userId = userModel.getCurrentUser();
+                if (userId == null) {
+                    SharedPreferences sharedPreferences = getContext().getSharedPreferences(App.SHARED_PREFERENCES_USER, getContext().MODE_PRIVATE);
+                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                }
+                bundle.putString("user_id", userId);
                 bundle.putString("user_name", tvUserName.getText().toString());
                 bundle.putString("user_phone", tvUserPhone.getText().toString());
                 bundle.putString("user_email", tvUserEmail.getText().toString());
@@ -104,7 +135,7 @@ public class SettingFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             tvUserName.setText(args.getString("user_name"));
-            if(args.getString("user_avatar") != null)
+            if (args.getString("user_avatar") != null)
                 imvUserAvatar.setImageURI(Uri.parse(args.getString("user_avatar")));
         }
 
@@ -112,8 +143,38 @@ public class SettingFragment extends Fragment {
     }
 
     public void getUserInfo() {
-        tvUserName.setText("UserName");
-        tvUserPhone.setText("0123456789");
-        tvUserEmail.setText("user@gmail.com");
+        String userId = userModel.getCurrentUser();
+        if (userId == null) {
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences(App.SHARED_PREFERENCES_USER, getContext().MODE_PRIVATE);
+            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+        }
+        if (userId != null) {
+            userModel.getUser(userId, new UserModel.UserCallBacks() {
+                @Override
+                public void onCallback(User user) {
+                    if (user != null) {
+                        tvUserName.setText(user.getUsername());
+                        if (user.getPhoneNumber().isEmpty()) {
+                            tvUserPhone.setText("Chưa cập nhật");
+                        } else {
+                            tvUserPhone.setText(user.getPhoneNumber());
+                        }
+
+                        if (!user.getAvatar().isEmpty()) {
+                            if (activity != null) {
+                                Glide.with(getContext())
+                                        .load(user.getAvatar())
+                                        .into(imvUserAvatar);
+                            }
+                        }
+                        if (user.getEmail().isEmpty()) {
+                            tvUserEmail.setText("Chưa cập nhật");
+                        } else {
+                            tvUserEmail.setText(user.getEmail());
+                        }
+                    }
+                }
+            });
+        }
     }
 }

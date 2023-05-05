@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean isLike = false;
     private int songIndex;
     private int action;
+    private int seekTo;
     private boolean isNowPlaying = false;
     private final UserModel userModel = new UserModel();
     private final PlaylistModel playlistModel = new PlaylistModel();
@@ -88,13 +89,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
                 songIndex = bundle.getInt(App.SONG_INDEX);
 
+                seekTo = bundle.getInt(App.SEEK_BAR_PROGRESS, 0);
                 isPlaying = bundle.getBoolean(App.IS_PLAYING);
                 isNowPlaying = bundle.getBoolean(App.IN_NOW_PLAYING);
                 isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
                 isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
 
                 action = bundle.getInt(App.ACTION_TYPE);
-                Log.e(TAG, "onReceive: " + action + " " + currentSong.getName() + " isPlaying: " + isPlaying + "; isNowPlaying: " + isNowPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat);
+                Log.e(TAG, "onReceive: action: " + action + " " + currentSong.getName() + " isPlaying: " + isPlaying + "; isNowPlaying: " + isNowPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat);
                 if (songs != null) {
                     Log.e(TAG, "onReceive: songs size: " + songs.size());
                 } else {
@@ -178,10 +180,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case R.id.bottom_playlist:
                         replaceFragment(new LibraryFragment());
 //                        Toast.makeText(MainActivity.this, "About", Toast.LENGTH_SHORT).show();
-                        return true;
-                    case R.id.bottom_profile:
-                        replaceFragment(new ProfileFragment());
-//                        Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_SHORT).show();
                         return true;
                     default:
                         return false;
@@ -277,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bundle.putBoolean(App.IS_PLAYING, isPlaying);
                 bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
                 bundle.putBoolean(App.IS_REPEAT, isRepeat);
+                bundle.putInt(App.SEEK_BAR_PROGRESS, seekTo);
                 playerFragment.setArguments(bundle);
                 fragmentTransaction.replace(R.id.frame_layout, playerFragment);
                 fragmentTransaction.addToBackStack(null);
@@ -424,8 +423,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handleLayoutCurrentSong(int action) {
         switch (action) {
-            case SongService.ACTION_START: {
-                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action + "; isLike: " + isLike);
+            case SongService.ACTION_START:
+            case SongService.ACTION_PLAY: {
+                Log.e(TAG, "handleLayoutCurrentSong: show current song bottom wit action: " + action + "; isLike: " + isLike + " ; songIndex : " + songIndex);
                 bottomCurrentSong.setVisibility(View.VISIBLE);
                 updateCurrentSongUI();
                 updateStatusUI();
@@ -535,6 +535,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bundle.putInt(App.SONG_INDEX, songIndex);
         bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
         bundle.putBoolean(App.IS_REPEAT, isRepeat);
+        bundle.putInt(App.SEEK_BAR_PROGRESS, seekTo);
 
         intent.putExtras(bundle);
         startService(intent);

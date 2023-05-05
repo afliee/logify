@@ -17,9 +17,6 @@
         android:id="@+id/bottom_playlist"
         android:title="@string/albums"
         android:icon="@drawable/playlist" />
-    <item
-        android:id="@+id/bottom_profile"
-        android:title="@string/profile"
-        android:icon="@drawable/persional" />
+
 
 </menu>

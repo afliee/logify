@@ -1,10 +1,12 @@
 package com.example.logify.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,6 +28,7 @@ import android.widget.TextView;
 import com.example.logify.R;
 import com.example.logify.adapters.SearchResultAdapter;
 import com.example.logify.adapters.SearchSuggestAdapter;
+import com.example.logify.constants.App;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
@@ -34,6 +37,7 @@ import com.example.logify.entities.User;
 import com.example.logify.models.AlbumModel;
 import com.example.logify.models.ArtistModel;
 import com.example.logify.models.PlaylistModel;
+import com.example.logify.services.SongService;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -312,12 +316,77 @@ public class SearchFragment extends Fragment {
                 if (object instanceof Album) {
                     Album album =  (Album) object;
                     Log.e(TAG, "onItemClick: clicked" + album.getName());
-
+                    goToViewAlbum(album);
+                } else if (object instanceof Song) {
+                    Song song = (Song) object;
+                    Log.e(TAG, "onItemClick: clicked: " + song.getName());
+                    gotoPlayer(song);
+                } else if (object instanceof Artist) {
+                    Artist artist = (Artist) object;
+                    Log.e(TAG, "onItemClick: clicked: " + artist.getName());
+                    goToViewArtist(artist);
                 }
             }
         });
 
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         rcvResult.setLayoutManager(layoutManager);
+    }
+
+    private void goToViewAlbum(Album album) {
+        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("album", album);
+        ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+        viewAlbumFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+    private void gotoPlayer(Song song) {
+        Intent intent = new Intent(getContext(), SongService.class);
+
+        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+        Bundle bundle = new Bundle();
+        ArrayList<Song> songs = new ArrayList<>();
+        songs.add(song);
+        bundle.putSerializable(App.SONGS_ARG, songs);
+//        bundle.putBoolean(App.IS_PLAYING, true);
+        bundle.putSerializable(App.CURRENT_SONG, song);
+
+        intent.putExtra(App.ACTION_TYPE, SongService.ACTION_PLAY);
+        intent.putExtras(bundle);
+        getActivity().startService(intent);
+
+        PlayerFragment playerFragment = new PlayerFragment();
+        playerFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.frame_layout, playerFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    private void goToViewArtist(Artist artist) {
+        playlistModel.getPublicPlaylist(artist.getPlaylistId(), new PlaylistModel.OnGetPublicPlaylistListener() {
+            @Override
+            public void onGetPublicPlaylist(Album album) {
+                album.setImage(artist.getImage());
+                album.setName(artist.getName());
+                Log.e(TAG, "onGetPublicPlaylist: album: " + album.toString());
+                AppCompatActivity activity = (AppCompatActivity) getContext();
+                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("album", album);
+                ViewAlbumFragment viewAlbumFragment = new ViewAlbumFragment();
+                viewAlbumFragment.setArguments(bundle);
+                fragmentTransaction.replace(R.id.frame_layout, viewAlbumFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+
+            @Override
+            public void onGetPublicPlaylistFailed() {
+                Log.e(TAG, "onGetPublicPlaylistFailed: erorr");
+            }
+        });
     }
 }

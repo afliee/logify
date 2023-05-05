@@ -10,6 +10,7 @@ public class Schema {
     public static final String FAVORITE_ALBUMS = "favoriteAlbums";
     public static final String FAVORITE_SONGS = "favoriteSongs";
     public static final String FAVORITE_ARTISTS = "favoriteArtists";
+    public static final String PRIVATE_PLAYLISTS = "privatePlaylists";
 
     public static class SongType {
         public static final String ID = "id";

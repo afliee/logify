@@ -1,9 +1,11 @@
 package com.example.logify.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -15,6 +17,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.logify.R;
@@ -23,6 +27,7 @@ import com.example.logify.adapters.LibraryPlaylistAdapter;
 import com.example.logify.adapters.SearchSuggestAdapter;
 import com.example.logify.adapters.SongAdapter;
 import com.example.logify.constants.App;
+import com.example.logify.constants.Schema;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
@@ -34,6 +39,9 @@ import com.example.logify.models.UserModel;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -54,6 +62,7 @@ public class LibraryFragment extends Fragment {
     private String mParam2;
     private RecyclerView rcvPlaylist;
     private RecyclerView rcvArtist;
+    private Button btnAdd;
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final UserModel userModel = new UserModel();
     private final ArtistModel artistModel = new ArtistModel();
@@ -98,6 +107,13 @@ public class LibraryFragment extends Fragment {
         rcvArtist = convertView.findViewById(R.id.rcvArtist);
         initArtist();
 
+        btnAdd = convertView.findViewById(R.id.btn_add);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleAddPrivatePlaylist();
+            }
+        });
         return convertView;
     }
 
@@ -221,5 +237,101 @@ public class LibraryFragment extends Fragment {
         }
 
     }
+    public void handleAddPrivatePlaylist() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Add Private Playlist");
+        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_private_playlist, (ViewGroup) getView(), false);
+        final EditText input = viewInflated.findViewById(R.id.playlist_name);
+        builder.setView(viewInflated);
 
+        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String playlistName = input.getText().toString();
+                if (playlistName.isEmpty()) {
+                    Toast.makeText(getContext(), "Playlist name is empty", Toast.LENGTH_SHORT).show();
+                } else {
+                    String userId = userModel.getCurrentUser();
+                    if (userId == null) {
+                        SharedPreferences sharedPreferences = getContext().getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                        userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                    }
+                    if (userId != null) {
+                        String finalUserId = userId;
+                        userModel.getConfig(userId, Schema.PRIVATE_PLAYLISTS, new UserModel.onGetConfigListener() {
+                            @Override
+                            public void onCompleted(List<Map<String, Object>> config) {
+                                if (config == null) {
+                                    config = new ArrayList<>();
+                                }
+
+                                String playlistId = UUID.randomUUID().toString();
+                                Map<String, Object> playlist = new HashMap<>();
+                                playlist.put("id", playlistId);
+                                playlist.put("name", playlistName);
+
+                                if (config.size() == 0) {
+                                    config.add(playlist);
+                                } else {
+                                    for (int i = 0; i < config.size(); i++) {
+                                        if (config.get(i).get("name").equals(playlistName)) {
+                                            Toast.makeText(getContext(), "Playlist name is existed", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                    }
+                                    config.add(playlist);
+                                }
+
+                                userModel.updateConfig(finalUserId, Schema.PRIVATE_PLAYLISTS, config, new UserModel.onAddConfigListener() {
+
+                                    @Override
+                                    public void onCompleted() {
+                                        Log.e(TAG, "onCompleted: update playlist config successfully");
+                                        playlist.put("image", "");
+                                        playlist.put("description", "Let enjoy music");
+                                        playlist.put("userId", finalUserId);
+                                        playlist.put("createdDate", LocalTime.now().toString());
+
+                                        playlistModel.addPrivatePlaylist(finalUserId, playlistId, playlist, new PlaylistModel.OnPlaylistAddListener() {
+                                            @Override
+                                            public void onPlaylistAdded() {
+                                                Toast.makeText(getContext(), "Add playlist successfully", Toast.LENGTH_SHORT).show();
+                                                dialog.dismiss();
+                                                initPlaylist();
+                                            }
+
+                                            @Override
+                                            public void onPlaylistAddFailed() {
+                                                Log.e(TAG, "onPlaylistAddFailed: add playlist failed");
+                                            }
+                                        });
+
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+                                        Log.e(TAG, "onFailure: update playlist failed");
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Log.e(TAG, "onFailure: get config failed");
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
 }

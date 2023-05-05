@@ -3,12 +3,14 @@ package com.example.logify.fragments;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -22,6 +24,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -54,7 +57,7 @@ public class PlayerFragment extends Fragment {
     private ArrayList<Song> songs;
     private int songIndex;
     private ImageView blurImageBackground, imgSong;
-    private ImageView btnShare, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat, btnBack;
+    private ImageView btnShare, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat, btnBack, btnAddToPlaylist;
     private TextView tvSeekbarCurrentPosition, tvSeekbarDuration;
     private TextView tvSongName, tvSongAtistName;
     private SeekBar seekBar;
@@ -66,6 +69,8 @@ public class PlayerFragment extends Fragment {
     private boolean isShuffle = false;
     private boolean isRepeat = false;
     private int seekTo = 0;
+    private String[] playlistIds;
+    private String[] playlistNames;
     private UserModel userModel;
     private PlaylistModel playlistModel;
     private Handler handler = new Handler();
@@ -138,10 +143,10 @@ public class PlayerFragment extends Fragment {
         Bundle bundle = getArguments();
         song = (Song) bundle.getSerializable(App.CURRENT_SONG);
         songs = (ArrayList<Song>) bundle.getSerializable(App.SONGS_ARG);
-        isPlaying = bundle.getBoolean(App.IS_PLAYING);
+        isPlaying = bundle.getBoolean(App.IS_PLAYING, false);
         isShuffle = bundle.getBoolean(App.IS_SHUFFLE, false);
         isRepeat = bundle.getBoolean(App.IS_REPEAT, false);
-        songIndex = bundle.getInt(App.SONG_INDEX);
+        songIndex = bundle.getInt(App.SONG_INDEX, 0);
         userModel = new UserModel();
         playlistModel = new PlaylistModel();
         if (songs != null) {
@@ -168,6 +173,7 @@ public class PlayerFragment extends Fragment {
         btnRepeat = view.findViewById(R.id.btn_repeat);
         btnBack = view.findViewById(R.id.btn_back);
         btnShuffle = view.findViewById(R.id.btn_shuffle);
+        btnAddToPlaylist = view.findViewById(R.id.btn_add_to_playlist);
 
         tvSeekbarCurrentPosition = view.findViewById(R.id.seek_bar_current_time);
         tvSeekbarDuration = view.findViewById(R.id.seek_bar_total_time);
@@ -320,6 +326,7 @@ public class PlayerFragment extends Fragment {
                 userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
                     @Override
                     public void onCompleted(List<Map<String, Object>> config) {
+
                         if (config == null) {
                             config = new ArrayList<>();
                         }
@@ -336,6 +343,7 @@ public class PlayerFragment extends Fragment {
                             }
                             config.add(data);
                         }
+
 
                         userModel.updateConfig(finalUserId, Schema.FAVORITE_SONGS, config, new UserModel.onAddConfigListener() {
                             @Override
@@ -368,9 +376,117 @@ public class PlayerFragment extends Fragment {
                         Log.e(TAG, "onFailure: error");
                     }
                 });
+
             }
         });
 
+        btnAddToPlaylist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userId = userModel.getCurrentUser();
+                if (userId == null) {
+                    SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                }
+                userModel.getConfig(userId, Schema.PRIVATE_PLAYLISTS, new UserModel.onGetConfigListener() {
+                    @Override
+                    public void onCompleted(List<Map<String, Object>> config) {
+                        if (config == null || config.size() == 0) {
+                            Toast.makeText(activity, "You don't have any playlist", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+//                        get playlist id into array string
+                        playlistIds = new String[config.size()];
+                        playlistNames = new String[config.size()];
+                        for (int i = 0; i < config.size(); i++) {
+                            String id = (String) config.get(i).get("id");
+                            String name = (String) config.get(i).get("name");
+                            playlistIds[i] = id;
+                            playlistNames[i] = name;
+                        }
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                        builder.setTitle("Choose playlist");
+                        builder.setItems(playlistNames, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String userId = userModel.getCurrentUser();
+                                if (userId == null) {
+                                    SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                                    userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+                                }
+                                String playlistId = playlistIds[which];
+                                HashMap<String, Object> data = new HashMap<>();
+                                data.put("songId", song.getId());
+                                data.put("songName", song.getName());
+                                String finalUserId = userId;
+                                userModel.getConfig(userId, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                                    @Override
+                                    public void onCompleted(List<Map<String, Object>> config) {
+
+                                        if (config == null) {
+                                            config = new ArrayList<>();
+                                        }
+
+                                        if (config.size() == 0) {
+                                            config.add(data);
+                                        } else {
+                                            for (int i = 0; i < config.size(); i++) {
+                                                String songId = (String) config.get(i).get("songId");
+                                                if (songId.equals(song.getId())) {
+                                                    config.remove(i);
+                                                    break;
+                                                }
+                                            }
+                                            config.add(data);
+                                        }
+
+
+                                        userModel.updateConfig(finalUserId, Schema.FAVORITE_SONGS, config, new UserModel.onAddConfigListener() {
+                                            @Override
+                                            public void onCompleted() {
+                                                Log.e(TAG, "onCompleted: config update completed");
+                                                playlistModel.addSongFavorite(finalUserId, playlistId, song, new PlaylistModel.OnPlaylistAddListener() {
+                                                    @Override
+                                                    public void onPlaylistAdded() {
+                                                        Log.e(TAG, "onPlaylistAdded: add song to favorite playlist " + playlistId + " completed");
+//                                                        sendBroadcastToService(SongService.ACTION_SONG_LIKED);
+                                                    }
+
+                                                    @Override
+                                                    public void onPlaylistAddFailed() {
+                                                        Log.e(TAG, "onPlaylistAddFailed: add song to favorite playlist " + playlistId + " failed");
+                                                    }
+                                                });
+
+                                            }
+
+                                            @Override
+                                            public void onFailure() {
+                                                Log.e(TAG, "onFailure: error");
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+                                        Log.e(TAG, "onFailure: error");
+                                    }
+                                });
+                            }
+                        });
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+
+                    @Override
+                    public void onFailure() {
+
+                    }
+                });
+            }
+        });
         btnShuffle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -439,7 +555,8 @@ public class PlayerFragment extends Fragment {
                 break;
             }
             case SongService.ACTION_NEXT:
-            case SongService.ACTION_PREVIOUS: {
+            case SongService.ACTION_PREVIOUS:
+            case SongService.ACTION_PLAY_BACK: {
                 isLike = false;
                 updateSeekbarUI();
                 updateStatusUI();
@@ -546,6 +663,14 @@ public class PlayerFragment extends Fragment {
                 seekTo = seekTo + 1;
                 seekBar.setProgress(seekTo);
                 tvSeekbarCurrentPosition.setText(durationToString(seekTo));
+                if (seekTo == song.getDuration()) {
+                    if (isRepeat) {
+                        seekTo = 0;
+                        sendBroadcastToService(SongService.ACTION_SEEK_TO);
+                    } else {
+                        sendBroadcastToService(SongService.ACTION_NEXT);
+                    }
+                }
                 handler.postDelayed(this, 1000);
             }
         }
@@ -562,19 +687,21 @@ public class PlayerFragment extends Fragment {
     }
 
     private void sendBroadcastToService(int action) {
-        Intent intent = new Intent(getContext(), SongService.class);
-        intent.putExtra(App.ACTION_TYPE, action);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(App.SONGS_ARG, songs);
-        bundle.putSerializable(App.CURRENT_SONG, song);
-        bundle.putInt(App.SONG_INDEX, songIndex);
-        bundle.putInt(App.SEEK_BAR_PROGRESS, seekTo);
-        bundle.putBoolean(App.IN_NOW_PLAYING, true);
-        bundle.putBoolean(App.IS_PLAYING, isPlaying);
-        bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
-        bundle.putBoolean(App.IS_REPEAT, isRepeat);
-        intent.putExtras(bundle);
-        getActivity().startService(intent);
+        if (activity != null) {
+            Intent intent = new Intent(activity, SongService.class);
+            intent.putExtra(App.ACTION_TYPE, action);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(App.SONGS_ARG, songs);
+            bundle.putSerializable(App.CURRENT_SONG, song);
+            bundle.putInt(App.SONG_INDEX, songIndex);
+            bundle.putInt(App.SEEK_BAR_PROGRESS, seekTo);
+            bundle.putBoolean(App.IN_NOW_PLAYING, true);
+            bundle.putBoolean(App.IS_PLAYING, isPlaying);
+            bundle.putBoolean(App.IS_SHUFFLE, isShuffle);
+            bundle.putBoolean(App.IS_REPEAT, isRepeat);
+            intent.putExtras(bundle);
+            getActivity().startService(intent);
+        }
     }
 
     private String durationToString(int duration) {

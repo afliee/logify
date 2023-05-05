@@ -1,9 +1,12 @@
 package com.example.logify.fragments;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -17,7 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.logify.R;
+import com.example.logify.entities.User;
+import com.example.logify.models.UserModel;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
@@ -33,6 +39,7 @@ public class EditProfileFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String TAG = "EditProfileFragment";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -45,6 +52,9 @@ public class EditProfileFragment extends Fragment {
     private EditText edtPhone;
     private EditText edtEmail;
     private Button btnSave;
+    private String userId;
+    private Activity activity;
+    private final UserModel userModel = new UserModel();
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -78,6 +88,18 @@ public class EditProfileFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        activity = getActivity();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        activity = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -93,6 +115,18 @@ public class EditProfileFragment extends Fragment {
         edtEditName.setText(args.getString("user_name"));
         edtPhone.setText(args.getString("user_phone"));
         edtEmail.setText(args.getString("user_email"));
+        userId = args.getString("user_id", null);
+
+        if (userId != null) {
+            userModel.getUser(userId, new UserModel.UserCallBacks() {
+                @Override
+                public void onCallback(User user) {
+                    if (user.getAvatar() != null && activity != null) {
+                        Glide.with(activity).load(user.getAvatar()).into(imvUser);
+                    }
+                }
+            });
+        }
 
         imvUser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,12 +145,22 @@ public class EditProfileFragment extends Fragment {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 SettingFragment settingFragment = new SettingFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString("user_name", edtEditName.getText().toString());
+//                bundle.putString("user_name", edtEditName.getText().toString());
                 if(imageUri != null) {
                     bundle.putString("user_avatar", imageUri.toString());
-                    Log.d("TEST", "onClick: " + imageUri.toString());
+                    Log.e(TAG, "onClick: " + imageUri.toString());
+                    if (userId != null) {
+                        userModel.updateUser(userId, edtEditName.getText().toString().trim(), imageUri.toString());
+                    }
+                } else {
+                    if (userId != null) {
+                        userModel.updateUser(userId, edtEditName.getText().toString().trim(), null);
+                    }
                 }
-//
+
+
+
+
                 settingFragment.setArguments(bundle);
 
                 fragmentTransaction.replace(R.id.frame_layout, settingFragment);
