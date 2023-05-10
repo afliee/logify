@@ -9,9 +9,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.logify.R;
 import com.example.logify.models.UserModel;
+import com.example.logify.utils.Crypto;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
@@ -145,7 +147,16 @@ public class RegisterActivity extends AppCompatActivity {
                 otpIntent.putExtra("verificationId", s);
                 otpIntent.putExtra("username", edtUsername.getText().toString().trim());
                 otpIntent.putExtra("phoneNumber", edtPhoneNumber.getText().toString().trim());
-                otpIntent.putExtra("password", edtPassword.getText().toString().trim());
+                String password = edtPassword.getText().toString().trim();
+                try {
+                    String passwordEncrypted = Crypto.encrypt(password);
+                    otpIntent.putExtra("password", passwordEncrypted);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(RegisterActivity.this, "Password invalid", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+//                otpIntent.putExtra("password", edtPassword.getText().toString().trim());
                 otpIntent.putExtra("recentToken", forceResendingToken);
                 otpIntent.putExtra("actionOption", OTPVerifyActivity.REGISTRATION);
                 verificationId = s;

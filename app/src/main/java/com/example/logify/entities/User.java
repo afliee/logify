@@ -109,13 +109,15 @@ public class User {
             result.put("phoneNumber", phoneNumber);
             result.put("password", password);
             result.put("playlistId", playlistId);
+            result.put("email", "");
             result.put("avatar", "");
         } else { // user logined with google
             result.put("uuid", uuid);
             result.put("username", username);
             result.put("phoneNumber", "");
-            result.put("email", phoneNumber);
+            result.put("password", password);
             result.put("playlistId", playlistId);
+            result.put("email", phoneNumber);
             result.put("avatar", avatar.toString());
         }
 

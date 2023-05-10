@@ -61,7 +61,7 @@ public class ViewAlbumFragment extends Fragment {
     private ArtistContributionAdapter artistContributionAdapter;
     private SongAdapter songAdapter;
     private Song currentSong;
-    private ImageView blurImageBackground, imgAlbumCover;
+    private ImageView blurImageBackground, imgAlbumCover, btnBack;
     private RecyclerView rcvAlbumSongs, rcvAlbumArtists, rcvAlbumGenres;
     private TextView tvAlbumTitle, tvAlbumArtist, tvSortDescription, tvArtistContributionTitle, tvSeeAllArtists;
     private ImageButton btnAddToPlaylist, btnDownloadAlbum, btnShareAlbum, btnShuffleAlbum, btnPlayAlbum;
@@ -155,6 +155,7 @@ public class ViewAlbumFragment extends Fragment {
 
         btnShuffleAlbum = albumView.findViewById(R.id.shuffle_album);
         btnPlayAlbum = albumView.findViewById(R.id.play_album);
+        btnBack = albumView.findViewById(R.id.btn_back);
 
         rcvAlbumSongs = albumView.findViewById(R.id.album_songs);
         rcvAlbumArtists = albumView.findViewById(R.id.artist_contributor_list);
@@ -294,6 +295,13 @@ public class ViewAlbumFragment extends Fragment {
                 sendActionToService(SongService.ACTION_SHUFFLE, songIndex);
             }
         });
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.onBackPressed();
+            }
+        });
     }
 
     private void handleShowAllArtists(ArrayList<Artist> artistArrayList) {
@@ -309,6 +317,8 @@ public class ViewAlbumFragment extends Fragment {
             }
         });
     }
+
+
 
     private void initUI() {
         RecyclerView.LayoutManager songLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);

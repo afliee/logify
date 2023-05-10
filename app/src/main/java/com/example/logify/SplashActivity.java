@@ -43,19 +43,22 @@ public class SplashActivity extends AppCompatActivity {
 //                    check if user was signed in
                     if (uuid != null) {
                         Log.e(TAG, "run: uuid found " + uuid);
-                        if (mAuth.getCurrentUser() == null) {
-                            Intent intent = new Intent(SplashActivity.this, SignInActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
+//                        if (mAuth.getCurrentUser() == null) {
+//                            Log.e(TAG, "run: current user is null");
+//                            Intent intent = new Intent(SplashActivity.this, SignInActivity.class);
+//                            startActivity(intent);
+//                            return;
+////                            finish();
+//                        }
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
-                        finish();
+//                        finish();
                     } else {
                         Log.e(TAG, "run: uuid not found " + uuid);
                         Intent intent = new Intent(SplashActivity.this, SignInActivity.class);
                         startActivity(intent);
-                        finish();
+//                        finish();
                     }
                 }
             }

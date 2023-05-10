@@ -88,8 +88,10 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SignInActivity.this, ForgotPasswordActivity.class);
+//                clear stack activity
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish();
+//                finish();
             }
         });
 
@@ -98,8 +100,10 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SignInActivity.this, RegisterActivity.class);
+//                clear stack activity
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish();
+//                finish();
             }
         });
     }
@@ -184,6 +188,7 @@ public class SignInActivity extends AppCompatActivity {
                     if (user != null) {
                         Log.e(TAG, "onCompleted: Login success " + user.getPhoneNumber());
                         if (cbRememberMe.isChecked()) {
+                            Log.e(TAG, "onCompleted: check is remember me + userid: " + user.getUuid());
                             SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString("uuid", user.getUuid());

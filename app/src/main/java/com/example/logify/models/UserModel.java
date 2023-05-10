@@ -3,6 +3,7 @@ package com.example.logify.models;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +13,7 @@ import com.example.logify.constants.App;
 import com.example.logify.constants.Schema;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.User;
+import com.example.logify.utils.Crypto;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -173,11 +175,23 @@ public class UserModel extends Model{
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = snapshot.getValue(User.class);
                 if (user != null) {
-                    if (user.getPhoneNumber().equals(phoneNumber) && user.getPassword().equals(password)) {
-                        loginCallBacks.onCompleted(user);
-                    } else {
+                    try {
+                        String passwordDecrypted = Crypto.decrypt(user.getPassword());
+                        if (user.getPhoneNumber().equals(phoneNumber) && password.equals(passwordDecrypted)) {
+                            loginCallBacks.onCompleted(user);
+                        } else {
+                            loginCallBacks.onFailure();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         loginCallBacks.onFailure();
                     }
+//                    if (user.getPhoneNumber().equals(phoneNumber) && user.getPassword().equals(password)) {
+//                        loginCallBacks.onCompleted(user);
+//                    } else {
+//                        loginCallBacks.onFailure();
+//                    }
                 } else {
                     loginCallBacks.onFailure();
                 }
@@ -201,13 +215,19 @@ public class UserModel extends Model{
 //                retrieve data from user collection
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     user = dataSnapshot.getValue(User.class);
-                    Log.w(TAG, "onDataChange: user "  + user.toString());
                     if (user != null) {
-                        if (user.getPhoneNumber().equals(phoneNumber) && user.getPassword().equals(password)) {
-                            loginCallBacks.onCompleted(user);
-                            isFound = true;
-                            break;
+                        try {
+                            String passwordDecrypted = Crypto.decrypt(user.getPassword());
+                            if (user.getPhoneNumber().equals(phoneNumber) && password.equals(passwordDecrypted)) {
+                                loginCallBacks.onCompleted(user);
+                                isFound = true;
+                                break;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            loginCallBacks.onFailure();
                         }
+
                     }
                 }
                 if (!isFound) {
@@ -235,16 +255,18 @@ public class UserModel extends Model{
                     if (user != null) {
                         if (user.getPhoneNumber().equals(phoneNumber)) {
                             isFound = true;
-                            break;
+                            callBacks.onExist();
+                            return;
+//                            break;
                         }
                     }
                 }
-
-                if (isFound) {
-                    callBacks.onExist();
-                } else {
-                    callBacks.onNotFound();
-                }
+                callBacks.onNotFound();
+//                if (isFound) {
+//                    callBacks.onExist();
+//                } else {
+//                    callBacks.onNotFound();
+//                }
             }
 
             @Override
@@ -259,11 +281,11 @@ public class UserModel extends Model{
         options = PhoneAuthOptions.newBuilder()
                 .setPhoneNumber(COUNTRY_CODE + phoneNumber)
                 .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(forgotPasswordActivity)
+
                 .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     @Override
                     public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
-
+                        Log.e(TAG, "onVerificationCompleted: verify completed" );
                     }
 
                     @Override

@@ -33,6 +33,7 @@ public class SettingFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String TAG = "SettingFragment";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -153,6 +154,7 @@ public class SettingFragment extends Fragment {
                 @Override
                 public void onCallback(User user) {
                     if (user != null) {
+                        Log.e(TAG, "onCallback: user :" + user.toMap().toString());
                         tvUserName.setText(user.getUsername());
                         if (user.getPhoneNumber().isEmpty()) {
                             tvUserPhone.setText("Chưa cập nhật");
@@ -167,7 +169,7 @@ public class SettingFragment extends Fragment {
                                         .into(imvUserAvatar);
                             }
                         }
-                        if (user.getEmail().isEmpty()) {
+                        if (user.getEmail() == null ||  user.getEmail().isEmpty()) {
                             tvUserEmail.setText("Chưa cập nhật");
                         } else {
                             tvUserEmail.setText(user.getEmail());

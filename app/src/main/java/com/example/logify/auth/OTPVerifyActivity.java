@@ -251,7 +251,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
                             Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
                             intent.putExtra("username", username);
                             startActivity(intent);
-                            finish();
+//                            finish();
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());

@@ -602,7 +602,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(this, "Logout!", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, SignInActivity.class);
                 startActivity(intent);
-                finish();
+//                finish();
                 break;
         }
         drawerLayout.closeDrawer(GravityCompat.START);

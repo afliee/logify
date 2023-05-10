@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -26,17 +27,23 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.logify.MainActivity;
 import com.example.logify.MainApplication;
 import com.example.logify.R;
 import com.example.logify.constants.App;
 import com.example.logify.entities.Song;
+import com.example.logify.fragments.PlayerFragment;
 import com.example.logify.models.SongModel;
 import com.example.logify.receivers.SongReceiver;
 
@@ -193,26 +200,49 @@ public class SongService extends Service {
 
 
     private void sendNotification() {
-        Intent intent = new Intent(this, MainActivity.class);
+
+        Intent intent = new Intent(this, PlayerFragment.class);
+        intent.putExtra(App.SONG_INDEX, songIndex);
+        intent.putExtra(App.SONGS_ARG, songs);
+        intent.putExtra(App.IN_NOW_PLAYING, true);
+        intent.putExtra(App.IS_SHUFFLE, isShuffle);
+        intent.putExtra(App.IS_REPEAT, isRepeat);
+        intent.putExtra(App.SEEK_BAR_PROGRESS, seekTo);
+        intent.putExtra(App.CURRENT_SONG, song);
+        intent.putExtra(App.IS_PLAYING, isPlaying);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         Bitmap picture;
-//        picture = BitmapFactory.decodeResource(getResources(), R.drawable.image_song_rounded);
-        try {
-            URL picture_url = new URL(song.getImageResource());
-            picture = BitmapFactory.decodeStream(picture_url.openConnection().getInputStream());
-//            notification.setStyle(new Notification.BigPictureStyle().bigPicture(picture));
-        } catch (Exception e) {
-            e.printStackTrace();
-            picture = BitmapFactory.decodeResource(getResources(), R.drawable.music_empty);
-        }
+////        picture = BitmapFactory.decodeResource(getResources(), R.drawable.image_song_rounded);
+//        try {
+//            URL picture_url = new URL(song.getImageResource());
+//            picture = BitmapFactory.decodeStream(picture_url.openConnection().getInputStream());
+////            notification.setStyle(new Notification.BigPictureStyle().bigPicture(picture));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            picture = BitmapFactory.decodeResource(getResources(), R.drawable.music_empty);
+//        }
 //        setting media setting notification
         MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(this, TAG);
         mediaSessionCompat.setActive(true);
-        mediaSessionCompat.setMetadata(MediaMetadataCompat.fromMediaMetadata(new MediaMetadata.Builder()
-                .putLong(MediaMetadata.METADATA_KEY_DURATION, 400)
-                .putString(MediaMetadata.METADATA_KEY_ARTIST, song.getArtistName())
-                .putString(MediaMetadata.METADATA_KEY_TITLE, song.getName())
-                .build()));
+        MediaMetadata.Builder mediaMetadataBuilder = new MediaMetadata.Builder();
+        mediaMetadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, song.getDuration());
+        mediaMetadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, song.getArtistName());
+        mediaMetadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, song.getName());
+        Glide.with(this)
+                .asBitmap()
+                .load(song.getImageResource())
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        mediaMetadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
+        mediaSessionCompat.setMetadata(MediaMetadataCompat.fromMediaMetadata(mediaMetadataBuilder.build()));
 
         mediaSessionCompat.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL);
         mediaSessionCompat.setFlags(0);
@@ -226,7 +256,6 @@ public class SongService extends Service {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, MainApplication.CHANNEL_ID)
                 .setSmallIcon(R.drawable.logo_small)
                 .setSound(null)
-                .setLargeIcon(picture)
                 .setSubText("Logify")
                 .setContentIntent(pendingIntent)
                 .setContentText(song.getName())
@@ -235,7 +264,19 @@ public class SongService extends Service {
                         .setShowActionsInCompactView(0, 1, 2)
                         .setMediaSession(mediaSessionCompat.getSessionToken())
                 );
+        Glide.with(this)
+                .asBitmap()
+                .load(song.getImageResource()).into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        notificationBuilder.setLargeIcon(resource);
+                    }
 
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
         if (isPlaying) {
             notificationBuilder
                     .addAction(R.drawable.baseline_skip_previous_24, "Previous", getPendingIntent(this, ACTION_PREVIOUS))

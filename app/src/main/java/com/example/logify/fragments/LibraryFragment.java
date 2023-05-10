@@ -62,10 +62,11 @@ public class LibraryFragment extends Fragment {
     private String mParam2;
     private RecyclerView rcvPlaylist;
     private RecyclerView rcvArtist;
-    private Button btnAdd;
+    private Button btnAdd, btnUpload;
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final UserModel userModel = new UserModel();
     private final ArtistModel artistModel = new ArtistModel();
+
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -108,6 +109,7 @@ public class LibraryFragment extends Fragment {
         initArtist();
 
         btnAdd = convertView.findViewById(R.id.btn_add);
+        btnUpload = convertView.findViewById(R.id.btn_upload);
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,7 +161,7 @@ public class LibraryFragment extends Fragment {
 
                             @Override
                             public void onGetSpecificPlaylistFailed() {
-                                Log.e(TAG, "onGetSpecificPlaylistFailed: failt to get private specific of playlist by " + finalUserId );
+                                Log.e(TAG, "onGetSpecificPlaylistFailed: failt to get private specific of playlist by " + finalUserId);
                             }
                         });
                     }
@@ -312,6 +314,7 @@ public class LibraryFragment extends Fragment {
         }
 
     }
+
     public void handleAddPrivatePlaylist() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Add Private Playlist");

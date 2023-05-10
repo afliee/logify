@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.logify.R;
 import com.example.logify.constants.App;
+import com.example.logify.constants.Schema;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Topic;
 import com.example.logify.entities.User;
@@ -87,14 +88,14 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
                 albumModel.find(albumId, new AlbumModel.FindAlbumListener() {
                     @Override
                     public void onAlbumFound(Album album) {
-                        Log.e(TAG, "onItemClick: " + position + album.toString());
+                        Log.e(TAG, "onItemClick: position: " + position  + "; album: "+ album.toString());
                         HashMap<String, Object> data = new HashMap<>();
                         data.put("albumId", album.getId());
                         data.put("albumName", album.getName());
                         String userId = userModel.getCurrentUser();
                         if (userId == null) {
-                            SharedPreferences sharedPreferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-                            userId = sharedPreferences.getString("userId", null);
+                            SharedPreferences sharedPreferences = context.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+                            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
                         }
                         String key = App.CONFIG_RECENTLY_PLAYLED;
                         Log.e(TAG, "onAlbumFound: userid: " + userId);

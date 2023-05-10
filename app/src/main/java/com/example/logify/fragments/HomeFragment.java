@@ -57,6 +57,7 @@ public class HomeFragment extends Fragment {
     private LinearLayout llRecentlyPlayed;
     private Activity activity;
     private ProgressBar loader;
+    private Context context;
     private UserModel userModel = new UserModel();
     private AlbumModel albumModel = new AlbumModel();
     private final PlaylistModel playlistModel = new PlaylistModel();
@@ -84,12 +85,14 @@ public class HomeFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        this.context = context;
         activity = getActivity();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        context = null;
         activity = null;
     }
 
@@ -121,7 +124,19 @@ public class HomeFragment extends Fragment {
 
     private void setUpRecentPlayed() {
         String userId = userModel.getCurrentUser();
+        if (userId == null) {
+            if (context == null) {
+                Log.e(TAG, "setUpRecentPlayed: context is null when get config");
+                return;
+            }
+            SharedPreferences sharedPreferences = context.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+            userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
+        }
         String key = "recentlyPlayed";
+        if (userId == null) {
+            Log.e(TAG, "setUpRecentPlayed: userid is null when get config");
+            return;
+        }
         userModel.getConfig(userId, key, new UserModel.onGetConfigListener() {
             @Override
             public void onCompleted(List<Map<String, Object>> config) {
@@ -144,7 +159,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure() {
-                Log.e(TAG, "onFailure: error occur");
+                Log.e(TAG, "onFailure: error occur when get config recently played home fragment");
             }
         });
     }
@@ -190,7 +205,6 @@ public class HomeFragment extends Fragment {
             SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
             userId = sharedPreferences.getString(App.SHARED_PREFERENCES_UUID, null);
         }
-        ArtistModel artistModel = new ArtistModel();
     }
 
 
