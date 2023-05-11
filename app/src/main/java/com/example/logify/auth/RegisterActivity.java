@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.example.logify.R;
 import com.example.logify.models.UserModel;
 import com.example.logify.utils.Crypto;
+import com.example.logify.utils.PasswordUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
@@ -149,7 +150,7 @@ public class RegisterActivity extends AppCompatActivity {
                 otpIntent.putExtra("phoneNumber", edtPhoneNumber.getText().toString().trim());
                 String password = edtPassword.getText().toString().trim();
                 try {
-                    String passwordEncrypted = Crypto.encrypt(password);
+                    String passwordEncrypted = PasswordUtils.hashPassword(password);
                     otpIntent.putExtra("password", passwordEncrypted);
                 } catch (Exception e) {
                     e.printStackTrace();

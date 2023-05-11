@@ -72,4 +72,12 @@
     <string name="enter_playlist">Enter playlist name</string>
     <string name="playlist_name">Playlist Name:</string>
     <string name="permission_required">Require Permission</string>
+    <string name="upload_bar_title">Choose and upload your favorite songs</string>
+    <string name="upload_sub_title">Free and Freeze</string>
+    <string name="upload_button">Upload here</string>
+    <string name="recent_uploaded">Recent Uploaded</string>
+    <string name="empty_upload">You have not uploaded any songs before</string>
+    <string name="file_name">xxx.mp3</string>
+    <string name="file_size">xxx Kbs</string>
+    <string name="save_your_choose">Save Your Choose</string>
 </resources>

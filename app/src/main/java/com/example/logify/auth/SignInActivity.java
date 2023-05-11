@@ -18,9 +18,11 @@ import android.widget.Toast;
 
 import com.example.logify.MainActivity;
 import com.example.logify.R;
+import com.example.logify.constants.App;
 import com.example.logify.entities.User;
 import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
+import com.example.logify.utils.PasswordUtils;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -28,16 +30,22 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
+import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 public class SignInActivity extends AppCompatActivity {
     TextInputEditText edtPhoneNumber, edtPassword;
@@ -53,6 +61,8 @@ public class SignInActivity extends AppCompatActivity {
     Dialog dialog;
     UserModel userModel;
     String uuid = "";
+    private String code;
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
     private static final int RC_SIGN_IN = 123;
     private static String TAG = "SignInActivity";
@@ -63,8 +73,17 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         init();
+        getDataIntent();
 
-//        config google sign in
+        String passwordtemp = "1111111";
+        try {
+            String hashed = PasswordUtils.hashPassword(passwordtemp);
+            Log.e(TAG, "onCreate: password hashed : " + hashed);
+            Log.e(TAG, "onCreate: password verified: " + PasswordUtils.verifyPassword(passwordtemp, hashed) );
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
 
 //        add event for button login
         btnLogin.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +150,12 @@ public class SignInActivity extends AppCompatActivity {
         uuid = sharedPreferences.getString("uuid", "");
     }
 
+    private void getDataIntent() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            code = intent.getStringExtra("code");
+        }
+    }
     private void handleLogin() {
         String phoneNumber = edtPhoneNumber.getText().toString();
         String password = edtPassword.getText().toString();
@@ -194,9 +219,48 @@ public class SignInActivity extends AppCompatActivity {
                             editor.putString("uuid", user.getUuid());
                             editor.apply();
                         }
-                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+
+                        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks () {
+                            @Override
+                            public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+//                                getDataIntent();
+//                                Log.e(TAG, "onVerificationCompleted: verify completed: code -> " + code);
+//                                if (code != null) {
+//                                    PhoneAuthCredential credential = PhoneAuthProvider.getCredential(phoneNumber, code);
+//                                    signInPhoneAuthWithCredential(credential);
+//                                }
+//                                signInPhoneAuthWithCredential(phoneAuthCredential);
+                            }
+
+                            @Override
+                            public void onVerificationFailed(@NonNull FirebaseException e) {
+
+                            }
+
+                            @Override
+                            public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                                super.onCodeSent(s, forceResendingToken);
+
+                                Intent intent = new Intent(SignInActivity.this, OTPVerifyActivity.class);
+                                intent.putExtra("phoneNumber", phoneNumber);
+                                intent.putExtra("password", password);
+                                intent.putExtra("verificationId", s);
+                                intent.putExtra("actionOption", OTPVerifyActivity.RE_LOGIN);
+                                startActivity(intent);
+                                finish();
+                            }
+                        };
+                        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                                "+84" + phoneNumber,
+                                60L,
+                                TimeUnit.SECONDS,
+                                SignInActivity.this,
+                                mCallbacks
+                        );
+
+//                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+//                        startActivity(intent);
+//                        finish();
                     } else {
                         
                         Log.e(TAG, "onCompleted: loggin failed");
@@ -235,6 +299,27 @@ public class SignInActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void signInPhoneAuthWithCredential(PhoneAuthCredential phoneAuthCredential) {
+        mAuth.signInWithCredential(phoneAuthCredential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "signInPhoneAuthWithCredential: success");
+                        FirebaseUser user = task.getResult().getUser();
+                        if (cbRememberMe.isChecked()) {
+                            SharedPreferences sharedPreferences = getSharedPreferences(App.SHARED_PREFERENCES_USER, MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(App.SHARED_PREFERENCES_UUID, user.getUid());
+                            editor.apply();
+                        }
+                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Log.d(TAG, "signInPhoneAuthWithCredential: failed");
+                    }
+                });
     }
 
     private void firebaseAuthWithGoogle(String idToken) {

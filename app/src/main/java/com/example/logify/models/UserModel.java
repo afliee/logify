@@ -14,6 +14,7 @@ import com.example.logify.constants.Schema;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.User;
 import com.example.logify.utils.Crypto;
+import com.example.logify.utils.PasswordUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -28,11 +29,13 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -82,17 +85,6 @@ public class UserModel extends Model{
     }
     public UserModel(DatabaseReference database) {
         super(database);
-        database.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.e(TAG, "onDataChange: " + snapshot.getKey());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "onCancelled: " + error.toString());
-            }
-        });
     }
 
 
@@ -206,19 +198,34 @@ public class UserModel extends Model{
 
 
     public void login(String phoneNumber, String password, LoginCallBacks loginCallBacks) {
+        Log.e(TAG, "login: in login without uuid");
         Query query = database.child(USER_COLLECTION);
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = null;
                 boolean isFound = false;
 //                retrieve data from user collection
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    user = dataSnapshot.getValue(User.class);
+                    JSONObject userObject = new JSONObject((Map) dataSnapshot.getValue());
+                    HashMap<String, Object> userMap = new HashMap<>();
+                    Iterator<String> keys = userObject.keys();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        try {
+                            userMap.put(key, userObject.get(key));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+//                    user = dataSnapshot.getValue(User.class);
+                    user = new User(userMap);
                     if (user != null) {
                         try {
-                            String passwordDecrypted = Crypto.decrypt(user.getPassword());
-                            if (user.getPhoneNumber().equals(phoneNumber) && password.equals(passwordDecrypted)) {
+                            boolean isMatch = PasswordUtils.verifyPassword(password, user.getPassword());
+                            Log.e(TAG, "onDataChange: password User: " + user.toString() + "; pass: " + user.getPassword() + "; is match: " + isMatch + "; map: " + user.toMap().toString());
+                            if (user.getPhoneNumber().equals(phoneNumber) && isMatch) {
                                 loginCallBacks.onCompleted(user);
                                 isFound = true;
                                 break;
@@ -232,6 +239,9 @@ public class UserModel extends Model{
                 }
                 if (!isFound) {
                     loginCallBacks.onFailure();
+                } else {
+                    Log.e(TAG, "onDataChange: user found: " + user.toString());
+                    loginCallBacks.onCompleted(user);
                 }
             }
 
@@ -244,7 +254,7 @@ public class UserModel extends Model{
 
     public void checkUserIsExist(String phoneNumber, CheckUserExistCallBacks callBacks) {
         Query query = database.child(USER_COLLECTION);
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = null;
@@ -303,6 +313,7 @@ public class UserModel extends Model{
                         intent.putExtra("verificationId", s);
                         intent.putExtra("actionOption", OTPVerifyActivity.FORGOT_PASSWORD);
                         forgotPasswordActivity.startActivity(intent);
+                        forgotPasswordActivity.finish();
                     }
                 }).build();
 

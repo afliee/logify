@@ -11,6 +11,7 @@ public class Schema {
     public static final String FAVORITE_SONGS = "favoriteSongs";
     public static final String FAVORITE_ARTISTS = "favoriteArtists";
     public static final String PRIVATE_PLAYLISTS = "privatePlaylists";
+    public static final String SONGS_UPLOADED = "songsUploaded";
 
     public static class SongType {
         public static final String ID = "id";
@@ -18,6 +19,10 @@ public class Schema {
         public static final String DESCRIPTION = "description";
         public static final String DURATION = "duration";
         public static final String IMAGE = "imageResource";
+        public static final String ARTIST_ID = "artistId";
+        public static final String RELEASE_DATE = "releaseDate";
+        public static final String IMAGE_RESOURCE = "imageResource";
+        public static final String RESOURCE = "resource";
     }
 
     public static class PlaylistType {

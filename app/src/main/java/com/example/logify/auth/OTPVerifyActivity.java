@@ -21,10 +21,15 @@ import android.widget.Toast;
 
 import com.example.logify.MainActivity;
 import com.example.logify.R;
+import com.example.logify.constants.App;
 import com.example.logify.entities.User;
 import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
+import com.example.logify.utils.Crypto;
+import com.example.logify.utils.PasswordUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
@@ -65,6 +70,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
     public static final int REGISTRATION = 1;
     public static final int FORGOT_PASSWORD = 2;
+    public static final int RE_LOGIN = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +122,9 @@ public class OTPVerifyActivity extends AppCompatActivity {
                             break;
                         case FORGOT_PASSWORD:
                             resetPasswordAuthCredential(credential);
+                            break;
+                        case RE_LOGIN:
+                            reLoginAuthCredential(credential);
                             break;
                         default:
                             Toast.makeText(OTPVerifyActivity.this, "Something went wrong when try authentication", Toast.LENGTH_SHORT).show();
@@ -199,6 +208,27 @@ public class OTPVerifyActivity extends AppCompatActivity {
         PhoneAuthProvider.verifyPhoneNumber(options);
     }
 
+    private void reLoginAuthCredential(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        SharedPreferences sharedPreferences = getSharedPreferences(App.SHARED_PREFERENCES_USER, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(App.SHARED_PREFERENCES_UUID, authResult.getUser().getUid());
+                        editor.apply();
+                        Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
+                        intent.putExtra("uuid", authResult.getUser().getUid());
+                        startActivity(intent);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(OTPVerifyActivity.this, "Something went wrong when try authentication", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -232,6 +262,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
                     }
                 });
     }
+
     private void resetPasswordAuthCredential(PhoneAuthCredential credential) {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -243,14 +274,23 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
                             FirebaseUser user = task.getResult().getUser();
                             // Create a new user with a first and last name
-                            userModel.updatePassword(user.getUid(), newPassword);
-                            SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("uuid", user.getUid());
-                            editor.apply();
-                            Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
-                            intent.putExtra("username", username);
-                            startActivity(intent);
+                            String passwordEncrypted = null;
+                            try {
+                                passwordEncrypted = PasswordUtils.hashPassword(newPassword);
+                                userModel.updatePassword(user.getUid(), passwordEncrypted);
+                                SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("uuid", user.getUid());
+                                editor.apply();
+                                Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
+                                intent.putExtra("username", username);
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(OTPVerifyActivity.this, "Something went wrong!!", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
 //                            finish();
                         } else {
                             // Sign in failed, display a message and update the UI
@@ -263,6 +303,9 @@ public class OTPVerifyActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
+
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -316,7 +359,6 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
         @Override
         public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
-            Log.e(TAG, "onVerificationCompleted: complete to send otp recent ");
 
         }
 
@@ -330,7 +372,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
         if (keyCode == KeyEvent.KEYCODE_DEL) {
-            Log.e(TAG, "onKeyUp: otpSelection " + otpSelection );
+            Log.e(TAG, "onKeyUp: otpSelection " + otpSelection);
             switch (otpSelection) {
                 case 6:
                     otpSelection = 5;

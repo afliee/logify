@@ -43,6 +43,14 @@ public class User {
         this.playlistId = playlistId;
     }
 
+    public User(HashMap<String, Object> userMap) {
+        this.uuid = (String) userMap.get("uuid");
+        this.username = (String) userMap.get("username");
+        this.phoneNumber = (String) userMap.get("phoneNumber");
+        this.password = (String) userMap.get("password");
+        this.playlistId = (String) userMap.get("playlistId");
+        this.avatar = Uri.parse((String) userMap.get("avatar"));
+    }
     public String getPassword() {
         return password;
     }

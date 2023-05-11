@@ -30,4 +30,12 @@ public class Model {
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
     }
+
+    public FirebaseAuth getAuth() {
+        return mAuth;
+    }
+
+    public void setAuth(FirebaseAuth mAuth) {
+        this.mAuth = mAuth;
+    }
 }

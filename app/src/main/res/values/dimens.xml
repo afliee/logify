@@ -69,4 +69,7 @@
     <dimen name="corner_image_song_size">300dp</dimen>
     <dimen name="recently_played_item_height">50dp</dimen>
     <dimen name="recently_played_title_size">14sp</dimen>
+    <dimen name="_30sp">30sp</dimen>
+    <dimen name="_15sp">15sp</dimen>
+    <dimen name="_10sp">10sp</dimen>
 </resources>

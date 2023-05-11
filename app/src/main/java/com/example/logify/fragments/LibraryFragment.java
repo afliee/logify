@@ -1,15 +1,17 @@
 package com.example.logify.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,14 +26,11 @@ import android.widget.Toast;
 import com.example.logify.R;
 import com.example.logify.adapters.LibraryArtistAdapter;
 import com.example.logify.adapters.LibraryPlaylistAdapter;
-import com.example.logify.adapters.SearchSuggestAdapter;
-import com.example.logify.adapters.SongAdapter;
 import com.example.logify.constants.App;
 import com.example.logify.constants.Schema;
 import com.example.logify.entities.Album;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.Playlist;
-import com.example.logify.entities.Song;
 import com.example.logify.entities.User;
 import com.example.logify.models.ArtistModel;
 import com.example.logify.models.PlaylistModel;
@@ -60,6 +59,8 @@ public class LibraryFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private Activity activity;
+    private Context context;
     private RecyclerView rcvPlaylist;
     private RecyclerView rcvArtist;
     private Button btnAdd, btnUpload;
@@ -116,7 +117,27 @@ public class LibraryFragment extends Fragment {
                 handleAddPrivatePlaylist();
             }
         });
+
+        btnUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleUpload();
+            }
+        });
         return convertView;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = getActivity();
+        this.context = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.activity = null;
     }
 
     public void initPlaylist() {
@@ -411,5 +432,17 @@ public class LibraryFragment extends Fragment {
         });
 
         builder.show();
+    }
+
+    private void handleUpload() {
+        if (activity != null) {
+            AppCompatActivity activityCompat = (AppCompatActivity) activity;
+            FragmentManager fragmentManager = activityCompat.getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            UploadFragment uploadFragment = new UploadFragment();
+            fragmentTransaction.replace(R.id.frame_layout, uploadFragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }
     }
 }
