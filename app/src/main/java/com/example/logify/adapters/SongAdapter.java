@@ -59,7 +59,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         if (song == null) {
             return;
         }
-        Glide.with(context).load(song.getImageResource()).into(holder.imgSong);
+        if (song.getImageResource().isEmpty()) {
+            Glide.with(context).load(R.drawable.image_song).into(holder.imgSong);
+        } else {
+            Glide.with(context).load(song.getImageResource()).into(holder.imgSong);
+        }
         holder.tvSongName.setText(song.getName());
         ArrayList<String> artistNames = song.getArtistsName();
         String artists = String.join(", ", artistNames);

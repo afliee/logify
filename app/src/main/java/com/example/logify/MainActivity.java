@@ -511,12 +511,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             bottomCurrentSong.setVisibility(View.VISIBLE);
             songTitle.setText(currentSong.getName());
             songArtist.setText(currentSong.getArtistName());
-            Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
+            if (currentSong.getImageResource().isEmpty()) {
+                Glide.with(MainActivity.this).load(R.drawable.image_song).into(albumArt);
+            } else {
+                Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
+            }
         } else {
             bottomCurrentSong.setVisibility(View.GONE);
             songTitle.setText(currentSong.getName());
             songArtist.setText(currentSong.getArtistName());
-            Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
+            if (currentSong.getImageResource().isEmpty()) {
+                Glide.with(MainActivity.this).load(R.drawable.image_song).into(albumArt);
+            } else {
+                Glide.with(MainActivity.this).load(currentSong.getImageResource()).into(albumArt);
+            }
         }
 //        checkSongAddedToFavorite();
         updateStatusUI();

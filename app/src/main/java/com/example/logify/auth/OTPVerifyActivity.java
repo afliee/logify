@@ -3,7 +3,6 @@ package com.example.logify.auth;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,10 +21,7 @@ import android.widget.Toast;
 import com.example.logify.MainActivity;
 import com.example.logify.R;
 import com.example.logify.constants.App;
-import com.example.logify.entities.User;
-import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
-import com.example.logify.utils.Crypto;
 import com.example.logify.utils.PasswordUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -41,8 +37,6 @@ import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import org.w3c.dom.Text;
 
 import java.util.concurrent.TimeUnit;
 

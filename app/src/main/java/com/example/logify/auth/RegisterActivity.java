@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import com.example.logify.R;
 import com.example.logify.models.UserModel;
-import com.example.logify.utils.Crypto;
 import com.example.logify.utils.PasswordUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;

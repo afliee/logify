@@ -7,6 +7,7 @@ public class App {
     public static final String IS_PLAYING = "isPlaying";
     public static final String ACTION_TYPE = "action";
     public static final String SONG_INDEX = "songIndex";
+    public static final String SONG_UPLOAD = "songUpload";
 
     public static final String IS_BACK = "isBack";
 

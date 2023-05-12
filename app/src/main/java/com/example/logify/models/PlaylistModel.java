@@ -41,6 +41,7 @@ public class PlaylistModel extends Model {
 
     public interface OnPlaylistSearchListener {
         void onCompleted(ArrayList<Playlist> playlists);
+
         void onFailed();
     }
 
@@ -55,6 +56,7 @@ public class PlaylistModel extends Model {
 
         void onPlaylistDeleteFailed();
     }
+
     public interface OnPlaylistRemoveListener {
         void onPlaylistRemoved();
 
@@ -78,6 +80,7 @@ public class PlaylistModel extends Model {
 
         void onGetSpecificPlaylistFailed();
     }
+
     public PlaylistModel() {
         super();
     }
@@ -194,7 +197,7 @@ public class PlaylistModel extends Model {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     Object songs = snapshot.getValue();
-                    Log.e(TAG, "onDataChange: songs: " +snapshot.getValue());
+                    Log.e(TAG, "onDataChange: songs: " + snapshot.getValue());
                     if (songs instanceof Map) {
                         Map<String, Object> songMap = (Map<String, Object>) songs;
                         for (Map.Entry<String, Object> entry : songMap.entrySet()) {
@@ -206,7 +209,7 @@ public class PlaylistModel extends Model {
                                 database.child(Schema.PLAYLISTS).child(userId).child(playlistId).child(Schema.FAVORITE_SONGS).child(entry.getKey()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        Log.e(TAG, "onComplete: " + entry.getKey() + " removed" );
+                                        Log.e(TAG, "onComplete: " + entry.getKey() + " removed");
                                         listener.onPlaylistRemoved();
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
@@ -356,7 +359,7 @@ public class PlaylistModel extends Model {
                         ArrayList<String> artistContributor = new ArrayList<>();
 
                         if (jsonArray != null) {
-                            for (int i =0; i < jsonArray.length(); i++) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject songObject = jsonArray.optJSONObject(i);
                                 String id = songObject.optString("id");
                                 String name = songObject.optString("title");
@@ -472,9 +475,12 @@ public class PlaylistModel extends Model {
 
                                 ArrayList<String> genres = new ArrayList<>();
                                 JSONArray genresArray = songObject.optJSONArray("genres");
-                                for (int j = 0; j < genresArray.length(); j++) {
-                                    String genre = genresArray.optString(j);
-                                    genres.add(genre);
+                                if (genresArray != null) {
+
+                                    for (int j = 0; j < genresArray.length(); j++) {
+                                        String genre = genresArray.optString(j);
+                                        genres.add(genre);
+                                    }
                                 }
 
                                 Song song = new Song(songId, songName, artistIds, artistNames, thumbnail, "Unknown", releaseDateStr, artistName, duration, genres);

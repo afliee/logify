@@ -3,7 +3,6 @@ package com.example.logify.models;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -13,7 +12,6 @@ import com.example.logify.constants.App;
 import com.example.logify.constants.Schema;
 import com.example.logify.entities.Artist;
 import com.example.logify.entities.User;
-import com.example.logify.utils.Crypto;
 import com.example.logify.utils.PasswordUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -168,8 +166,9 @@ public class UserModel extends Model{
                 User user = snapshot.getValue(User.class);
                 if (user != null) {
                     try {
-                        String passwordDecrypted = Crypto.decrypt(user.getPassword());
-                        if (user.getPhoneNumber().equals(phoneNumber) && password.equals(passwordDecrypted)) {
+//                        String passwordDecrypted = Crypto.decrypt(user.getPassword());
+                        boolean isMatch = PasswordUtils.verifyPassword(password, user.getPassword());
+                        if (user.getPhoneNumber().equals(phoneNumber) && isMatch) {
                             loginCallBacks.onCompleted(user);
                         } else {
                             loginCallBacks.onFailure();

@@ -80,4 +80,5 @@
     <string name="file_name">xxx.mp3</string>
     <string name="file_size">xxx Kbs</string>
     <string name="save_your_choose">Save Your Choose</string>
+    <string name="your_playlist">Your Playlist</string>
 </resources>

@@ -269,6 +269,18 @@ public class UploadFragment extends Fragment {
 
                 RecentUploadedAdapter adapter = new RecentUploadedAdapter(context, songs);
                 rvRecentUploads.setAdapter(adapter);
+
+                adapter.setOnItemClickListener(new RecentUploadedAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Song song, int position) {
+                        PrivatePlaylistBottomSheetFragment bottomSheetFragment = new PrivatePlaylistBottomSheetFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable(App.SONG_UPLOAD, song);
+                        bottomSheetFragment.setArguments(bundle);
+                        bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                        bottomSheetFragment.setCancelable(true);
+                    }
+                });
             }
 
             @Override
@@ -318,7 +330,7 @@ public class UploadFragment extends Fragment {
                     filePath = uri.toString();
 //                    copy content uri to temp file
                     copyToTempFile(uri);
-                    getDuration(currentFile);
+//                    getDuration(currentFile);
                     sendDataToEdit();
                 }
                 break;
@@ -327,6 +339,7 @@ public class UploadFragment extends Fragment {
     }
 
     private void sendDataToEdit() {
+        Log.e(TAG, "sendDataToEdit: duration: " + fileDuration);
         Bundle bundle = new Bundle();
         bundle.putSerializable(EditFileFragment.FILE, currentFile);
         bundle.putString(EditFileFragment.FILE_NAME, fileName);
@@ -366,19 +379,32 @@ public class UploadFragment extends Fragment {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             retriever.setDataSource(file.getAbsolutePath());
             String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            fileDuration = Long.parseLong(time);
+            fileDuration = Long.parseLong(time) / 1000;
             retriever.release();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private void getDuration(Uri uri) {
+        try {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(activity, uri);
+            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            Log.e(TAG, "getDuration: time duration: " + time );
+            fileDuration = Long.parseLong(time) / 1000;
+            retriever.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     //    copy content uri to tempfile
     private void copyToTempFile(Uri uri) {
         try {
             ParcelFileDescriptor parcelFileDescriptor = activity.getContentResolver().openFileDescriptor(uri, "r", null);
             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
             getFileDisplayName(uri);
+            getDuration(uri);
             File tempFile = File.createTempFile(fileName == null ? "temp" : fileName, ".mp3", activity.getCacheDir());
             Log.d(TAG, "copyToTempFile: " + tempFile.getAbsolutePath());
             InputStream inputStream = new FileInputStream(fileDescriptor);
@@ -519,6 +545,7 @@ public class UploadFragment extends Fragment {
                 map.put(Schema.SongType.IMAGE_RESOURCE, song.getImageResource());
                 map.put(Schema.SongType.RELEASE_DATE, song.getReleaseDate());
                 map.put(Schema.SongType.RESOURCE, song.getResource());
+                Log.e(TAG, "onCompleted: map: " + map.toString());
 
                 if (config.size() == 0) {
                     config.add(map);

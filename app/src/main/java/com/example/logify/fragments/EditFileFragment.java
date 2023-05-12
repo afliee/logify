@@ -101,6 +101,7 @@ public class EditFileFragment extends Fragment {
             fileName = bundle.getString(FILE_NAME);
             fileSize = bundle.getLong(FILE_SIZE);
             filePath = bundle.getString(FILE_PATH);
+            fileDuration = bundle.getLong(FILE_DURATION);
         }
     }
 

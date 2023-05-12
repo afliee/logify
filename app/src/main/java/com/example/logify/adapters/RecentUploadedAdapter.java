@@ -22,6 +22,11 @@ public class RecentUploadedAdapter extends RecyclerView.Adapter<RecentUploadedAd
 
     private Context context;
     private ArrayList<Song> songs;
+    public interface OnItemClickListener {
+        void onItemClick(Song song, int position);
+    }
+
+    private OnItemClickListener listener;
 
     public RecentUploadedAdapter(Context context) {
         this.context = context;
@@ -37,6 +42,9 @@ public class RecentUploadedAdapter extends RecyclerView.Adapter<RecentUploadedAd
         notifyDataSetChanged();
     }
 
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
     @NonNull
     @Override
     public RecentUploadedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -71,7 +79,7 @@ public class RecentUploadedAdapter extends RecyclerView.Adapter<RecentUploadedAd
         return songs == null ? 0 : songs.size();
     }
 
-    public class RecentUploadedViewHolder extends RecyclerView.ViewHolder {
+    public class RecentUploadedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
 
         private ImageView imgSong, imgOption;
@@ -85,6 +93,17 @@ public class RecentUploadedAdapter extends RecyclerView.Adapter<RecentUploadedAd
             tvSongName = itemView.findViewById(R.id.title);
             tvArtistName = itemView.findViewById(R.id.description);
             imgOption = itemView.findViewById(R.id.menu_button);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Song song = songs.get(position);
+            if (song == null) {
+                return;
+            }
+            listener.onItemClick(song, position);
         }
     }
 }
