@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/header"
-        android:text="Artist Contribution header"
+        android:text="Artist Contribution"
         android:textSize="@dimen/artist_contribution_header_text_size"
         android:textStyle="bold"
         android:padding="@dimen/_10dp"

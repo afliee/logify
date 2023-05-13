@@ -97,17 +97,17 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-<!--                <ImageButton-->
-<!--                    android:id="@+id/add_to_playlist"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginEnd="10dp"-->
-<!--                    android:background="@null"-->
-<!--                    android:contentDescription="TODO"-->
-<!--                    android:minWidth="48dp"-->
-<!--                    android:minHeight="48dp"-->
-<!--                    android:src="@drawable/baseline_favorite_border_24"-->
-<!--                    app:tint="?attr/iconTintColor" />-->
+                <ImageButton
+                    android:id="@+id/qr_code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:background="@null"
+                    android:contentDescription="TODO"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/baseline_qr_code_24"
+                    app:tint="?attr/iconTintColor" />
 
 <!--                <ImageButton-->
 <!--                    android:id="@+id/download_album"-->

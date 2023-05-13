@@ -14,6 +14,10 @@
             android:icon="@drawable/baseline_settings_24"
             android:title="Settings"/>
         <item
+            android:id="@+id/nav_scan"
+            android:icon="@drawable/baseline_qr_code_scanner_24"
+            android:title="Scan Album"/>
+        <item
             android:id="@+id/nav_about"
             android:icon="@drawable/baseline_info_24"
             android:title="About Us"/>

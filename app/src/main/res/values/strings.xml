@@ -81,4 +81,12 @@
     <string name="file_size">xxx Kbs</string>
     <string name="save_your_choose">Save Your Choose</string>
     <string name="your_playlist">Your Playlist</string>
+    <string name="barcode_title">Scan QR Code\n</string>
+    <string name="barcode_description">Scan the album QR code to enjoy the album with your friends \n</string>
+    <string name="scan_barcode">Scan QR Code</string>
+    <string name="album_qr_code">Album\'s Code</string>
+    <string name="qr_code_description">
+        Scan the {0} QR code to enjoy the album with your friends
+    </string>
+    <string name="qr_description">Let share it to your friend and enjoy together</string>
 </resources>

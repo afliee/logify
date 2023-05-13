@@ -46,6 +46,7 @@ import com.example.logify.fragments.PlayerFragment;
 import com.example.logify.fragments.ProfileFragment;
 import com.example.logify.fragments.SearchFragment;
 import com.example.logify.fragments.SettingFragment;
+import com.example.logify.fragments.TakeBarCodeFragment;
 import com.example.logify.models.PlaylistModel;
 import com.example.logify.models.UserModel;
 import com.example.logify.services.SongService;
@@ -179,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 switch (item.getItemId()) {
                     case R.id.bottom_home:
                         replaceFragment(new HomeFragment());
+                        navigationView.setCheckedItem(R.id.nav_home);
 //                        Toast.makeText(MainActivity.this, "Home", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.bottom_search:
@@ -601,6 +603,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_about:
                 replaceFragment(new AboutUsFragment());
                 break;
+            case R.id.nav_scan:
+                replaceFragment(new TakeBarCodeFragment());
+                break;
             case R.id.nav_logout:
                 mAuth.signOut();
                 SharedPreferences userRef = getSharedPreferences("user", MODE_PRIVATE);
@@ -633,8 +638,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
 //            refund to to main activity again
             handleBottomBehavior();
-        } else {
-            Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+        } //else {
+            //Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+        //}
+
+        if (requestCode == TakeBarCodeFragment.REQUEST_CAMERA_PERMISSION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+                replaceFragment(new TakeBarCodeFragment());
+            } else {
+                Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

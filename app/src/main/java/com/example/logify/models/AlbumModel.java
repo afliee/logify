@@ -31,9 +31,12 @@ public class AlbumModel extends Model {
 
     public interface OnSearchListener {
         void onAlbumFound(ArrayList<Album> albums);
+
         void onSongFound(ArrayList<Song> songs);
+
         void onNotExist();
     }
+
     public AlbumModel() {
         super();
     }
@@ -93,9 +96,11 @@ public class AlbumModel extends Model {
 
                                 ArrayList<String> genres = new ArrayList<>();
                                 JSONArray genresArray = songObject.optJSONArray("genreIds");
-                                for (int j = 0; j < genresArray.length(); j++) {
-                                    String genre = genresArray.optString(j);
-                                    genres.add(genre);
+                                if (genresArray != null) {
+                                    for (int j = 0; j < genresArray.length(); j++) {
+                                        String genre = genresArray.optString(j);
+                                        genres.add(genre);
+                                    }
                                 }
 
                                 Song song = new Song(id, name, artistIds, artistNames, thumbnail, url, releaseDateStr, artistName, duration, genres);
@@ -120,7 +125,7 @@ public class AlbumModel extends Model {
         });
     }
 
-    public void search (String key, OnSearchListener listener) {
+    public void search(String key, OnSearchListener listener) {
         Query query = database.child(Schema.ALBUMS);
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -215,7 +220,7 @@ public class AlbumModel extends Model {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "onCancelled: error occur in search album + song" );
+                Log.e(TAG, "onCancelled: error occur in search album + song");
             }
         });
     }

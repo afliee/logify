@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,7 +65,7 @@ public class ViewAlbumFragment extends Fragment {
     private ImageView blurImageBackground, imgAlbumCover, btnBack;
     private RecyclerView rcvAlbumSongs, rcvAlbumArtists, rcvAlbumGenres;
     private TextView tvAlbumTitle, tvAlbumArtist, tvSortDescription, tvArtistContributionTitle, tvSeeAllArtists;
-    private ImageButton btnAddToPlaylist, btnDownloadAlbum, btnShareAlbum, btnShuffleAlbum, btnPlayAlbum;
+    private ImageButton btnShuffleAlbum, btnPlayAlbum, btnGetQRCode;
     private LinearLayout llArtistContributorsTitle;
     private Context context = getContext();
     private Activity activity;
@@ -156,6 +157,7 @@ public class ViewAlbumFragment extends Fragment {
         btnShuffleAlbum = albumView.findViewById(R.id.shuffle_album);
         btnPlayAlbum = albumView.findViewById(R.id.play_album);
         btnBack = albumView.findViewById(R.id.btn_back);
+        btnGetQRCode = albumView.findViewById(R.id.qr_code);
 
         rcvAlbumSongs = albumView.findViewById(R.id.album_songs);
         rcvAlbumArtists = albumView.findViewById(R.id.artist_contributor_list);
@@ -300,6 +302,19 @@ public class ViewAlbumFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 activity.onBackPressed();
+            }
+        });
+
+        btnGetQRCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                QRBottomSheetFragment qrBottomSheetFragment = new QRBottomSheetFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("albumId", album.getId());
+                bundle.putString("albumName", album.getName());
+                qrBottomSheetFragment.setArguments(bundle);
+                qrBottomSheetFragment.show(getFragmentManager(), "qr_bottom_sheet");
+                qrBottomSheetFragment.setCancelable(true);
             }
         });
     }

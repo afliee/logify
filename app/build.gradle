@@ -47,6 +47,9 @@ dependencies {
 
     // Also add the dependency for the Google Play services library and specify its version
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
+//    support qr code
+    implementation 'com.google.android.gms:play-services-vision:20.1.3'
+
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-storage'
 
@@ -69,6 +72,9 @@ dependencies {
 //    file utils
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-io:1.3.2'
+
+//    qr generator
+    implementation 'com.google.zxing:core:3.5.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
