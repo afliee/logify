@@ -89,4 +89,7 @@
         Scan the {0} QR code to enjoy the album with your friends
     </string>
     <string name="qr_description">Let share it to your friend and enjoy together</string>
+    <string name="share_to_other_app">Share</string>
+    <string name="get_from_gallery">From Gallery</string>
+
 </resources>

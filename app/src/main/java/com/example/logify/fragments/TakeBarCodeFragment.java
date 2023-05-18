@@ -1,10 +1,15 @@
 package com.example.logify.fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +21,8 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -35,7 +42,13 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +65,7 @@ public class TakeBarCodeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = "TakeBarCodeFragment";
     public static final int REQUEST_CAMERA_PERMISSION = 201;
+    private static final int REQUEST_GET_FROM_GALLERY = 202;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String ALBUM_ID = "albumId";
@@ -66,7 +80,7 @@ public class TakeBarCodeFragment extends Fragment {
     private BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
     private Uri imageUri;
-    private Button btnScan;
+    private Button btnScan, btnScanFromGallery;
     private Context context;
     private FragmentActivity activityCompat;
     private boolean isDetected = false;
@@ -153,7 +167,7 @@ public class TakeBarCodeFragment extends Fragment {
     private void init(View view) {
         cameraView = view.findViewById(R.id.camera_preview);
         btnScan = view.findViewById(R.id.btn_scan);
-
+        btnScanFromGallery = view.findViewById(R.id.btn_scan_gallery);
 
         initSurface();
     }
@@ -214,7 +228,7 @@ public class TakeBarCodeFragment extends Fragment {
                         SparseArray<Barcode> barcodes = detections.getDetectedItems();
                         if (barcodes.size() > 0) {
                             String qrCodeContents = barcodes.valueAt(0).displayValue;
-                            Log.e(TAG, "receiveDetections: value scan: "  + qrCodeContents);
+                            Log.e(TAG, "receiveDetections: value scan: " + qrCodeContents);
                             // Perform any necessary actions with the QR code contents
                             if (!isDetected) {
                                 isDetected = true;
@@ -231,6 +245,29 @@ public class TakeBarCodeFragment extends Fragment {
                 });
             }
         });
+
+        btnScanFromGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!Environment.isExternalStorageManager()) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                    } else {
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                    }
+
+                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_GET_FROM_GALLERY);
+                }
+            }
+        });
     }
 
     private void findAndGotoAlbum(String qrCodeContents) {
@@ -239,7 +276,7 @@ public class TakeBarCodeFragment extends Fragment {
         albumModel.find(qrCodeContents, new AlbumModel.FindAlbumListener() {
             @Override
             public void onAlbumFound(Album album) {
-                Log.e(TAG, "onAlbumFound" + "; album: "+ album.toString());
+                Log.e(TAG, "onAlbumFound" + "; album: " + album.toString());
                 HashMap<String, Object> data = new HashMap<>();
                 data.put("albumId", album.getId());
                 data.put("albumName", album.getName());
@@ -324,6 +361,55 @@ public class TakeBarCodeFragment extends Fragment {
                 Log.e(TAG, "onRequestPermissionsResult: init sureface here");
                 btnScan.setEnabled(true);
                 initSurface();
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode == REQUEST_GET_FROM_GALLERY) && resultCode == Activity.RESULT_OK) {
+            if (data == null || data.getData() == null) {
+                return;
+            }
+
+            Uri uri = data.getData();
+
+            try {
+                InputStream inputStream = context.getContentResolver().openInputStream(uri);
+//                create bitmap from uri
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                if (bitmap == null) {
+                    Toast.makeText(context, "Invalid Image", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int width = bitmap.getWidth();
+                int height = bitmap.getHeight();
+
+                int newWidth = 500;
+                int newHeight = 500;
+
+                float scaleWidth = ((float) newWidth) / width;
+                float scaleHeight = ((float) newHeight) / height;
+
+                int[] pixels = new int[width * height];
+                bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+                bitmap.recycle();
+
+                bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+                RGBLuminanceSource source = new RGBLuminanceSource(newWidth, newHeight, pixels);
+                BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
+                QRCodeReader reader = new QRCodeReader();
+
+                Result result = reader.decode(binaryBitmap);
+                String qrCodeContents = result.getText();
+                findAndGotoAlbum(qrCodeContents);
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
